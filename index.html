@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sports Watch — USAFL Women's Footy Map</title>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+:root{
+  --card-bg: rgba(255,255,255,0.95);
+  --ui-accent: #0b66b2;
+  --muted: #6b6b6b;
+  --panel-w: 300px;
+}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+#map{height:100%;width:100%;}
+
+/* Full-width ticker */
+#ticker {
+  position:absolute; top:0; left:0; width:100%; z-index:1400; display:flex; justify-content:center; pointer-events:none;
+}
+.ticker-card {
+  background: rgba(11,102,178,0.7); /* more transparent */
+  padding: 14px 18px; /* taller */
+  font-size: 15px;
+  font-weight:600;
+  width:100%;
+  max-width:none;
+  display:flex; justify-content:center;
+  gap:12px;
+  pointer-events:auto;
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);
+  border-radius:6px;
+}
+
+/* Sidebars */
+.sidebar {
+  position:absolute; right:12px; z-index:1300; width:var(--panel-w); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  overflow:hidden; background:var(--card-bg);
+}
+#clubsSidebar{ top:60px; }
+#eventsSidebar{ top:120px; transition:top .28s ease; }
+
+.sidebar-header{
+  background:linear-gradient(90deg,var(--ui-accent),#114b7a);
+  color:white; padding:8px 12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+}
+.sidebar-content{ padding:10px; max-height:380px; overflow:auto; }
+.club-item{ display:flex; align-items:center; gap:8px; padding:8px; border-radius:8px; cursor:pointer; }
+.club-item:hover{ background: #f3f6fb; }
+.club-item img{ width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+
+.controls { display:flex; gap:8px; margin-bottom:8px; }
+.btn { padding:6px 8px;border-radius:8px;border:none;cursor:pointer;background:#e6eef8;color:#06345f;font-weight:700; }
+.btn.active { background:var(--ui-accent); color:white; }
+
+.legend { font-size:13px; color:var(--muted); margin-top:8px; }
+.legend-item{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.legend-dot{ width:12px;height:12px;border-radius:50%;display:inline-block; }
+
+/* bottom-right calendar */
+#calendarContainer{
+  position:absolute; bottom:12px; right:12px; z-index:1300; background:var(--card-bg); border-radius:10px; padding:8px 12px; box-shadow:0 6px 18px rgba(0,0,0,0.2); display:none;
+}
+#calendarContainer label{ font-weight:700; margin-right:6px; }
+#calendarContainer input[type=date]{ padding:4px 6px; border-radius:6px; border:1px solid #ccc; }
+
+/* popup card */
+.popup-card{
+  text-align:center;
+  width:160px;
+  font-size:13px;
+}
+.popup-card img{ width:48px;height:48px;border-radius:50%;display:block;margin:0 auto 6px;box-shadow:0 4px 10px rgba(0,0,0,0.18); }
+.small-muted{ font-size:12px;color:#666;margin-top:4px; }
+
+/* Club markers transparency */
+.leaflet-marker-icon {
+  opacity:0.8;
+  transition: opacity 0.2s;
+}
+.leaflet-marker-icon:hover,
+.leaflet-marker-icon.clicked {
+  opacity:1;
+}
+
+@media(max-width:900px){
+  .sidebar{ right:8px; width:260px; }
+  #calendarContainer{ right:8px; bottom:8px; }
+}
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- ticker -->
+<div id="ticker"><div class="ticker-card"><div id="tickerText">Loading upcoming events…</div></div></div>
+
+<!-- Clubs sidebar -->
+<div id="clubsSidebar" class="sidebar">
+  <div class="sidebar-header" id="clubsToggle">Women’s Footy Clubs <span id="clubsCount" style="font-size:12px;opacity:.9"></span></div>
+  <div id="clubsContent" class="sidebar-content" hidden>
+    <div id="clubList">Loading clubs…</div>
+  </div>
+</div>
+
+<!-- Events sidebar -->
+<div id="eventsSidebar" class="sidebar">
+  <div class="sidebar-header" id="eventsToggle">Events</div>
+  <div id="eventsContent" class="sidebar-content" hidden>
+    <div class="controls">
+      <button id="gamesBtn" class="btn">Games</button>
+      <button id="practicesBtn" class="btn">Practices</button>
+      <button id="allBtn" class="btn active">All</button>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot" style="background:#66ccff"></span> Club Metro</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#0077cc"></span> Club Tournament</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#003366"></span> League Tournament</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#32cd32"></span> Practice</div>
+    </div>
+  </div>
+</div>
+
+<!-- bottom-right calendar -->
+<div id="calendarContainer">
+  <label for="calendarDate">Date:</label>
+  <input type="date" id="calendarDate" min="2026-04-01" max="2026-11-30">
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script type="module">
+
+const CLUB_SHEET_URL  = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ2pBQSzKGgCOYPtXyCnC-WOkn-N_6rzjgXPJg3icI-OtgESyHp2WDAPgtYXj_4F0NDNhTfT-zi82cx/pub?output=csv";
+const EVENTS_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ23xarhIttcDfoXomCljmxYJo59Fb6Xqbw3wcFcj-gkLena0UTY1-BR5keuQx71h_zLrKsy_cV8aFg/pub?output=csv";
+const PROXY = "https://api.allorigins.win/raw?url=";
+
+const start=new Date("2026-04-01");
+const end=new Date("2026-11-30");
+const gameColors={"club-metro":"#66ccff","club-tournament":"#0077cc","league-tournament":"#003366"};
+const practiceColor="#32cd32";
+const usaflLogo="https://aussierulesusa.com/wp-content/uploads/2024/05/USAFL_logo.png";
+
+let clubs=[], markers=[], mode="clubs", eventType="all", lastClickedMarker=null;
+
+const map=L.map("map").setView([39.5,-85],4);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"&copy; OpenStreetMap contributors"}).addTo(map);
+
+const clubListEl=document.getElementById("clubList");
+const clubsToggle=document.getElementById("clubsToggle");
+const clubsContent=document.getElementById("clubsContent");
+const eventsToggle=document.getElementById("eventsToggle");
+const eventsContent=document.getElementById("eventsContent");
+const gamesBtn=document.getElementById("gamesBtn");
+const practicesBtn=document.getElementById("practicesBtn");
+const allBtn=document.getElementById("allBtn");
+const tickerText=document.getElementById("tickerText");
+const clubsCount=document.getElementById("clubsCount");
+const calendarContainer=document.getElementById("calendarContainer");
+const calendarDate=document.getElementById("calendarDate");
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function iconSizeForZoom(z){return clamp(Math.round(28+(z-3)*6),22,96);}
+function makeLogoIcon(logo,borderColor=null){
+  const z=map.getZoom(), size=iconSizeForZoom(z);
+  const border=borderColor?`border:3px solid ${borderColor};`:"border:2px solid rgba(255,255,255,0.95);";
+  const html=`<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.18);background:#fff;display:flex;align-items:center;justify-content:center;"><img src="${logo}" style="width:${size-6}px;height:${size-6}px;object-fit:cover;${border}border-radius:50%;"></div>`;
+  return L.divIcon({html,className:"",iconSize:[size,size],iconAnchor:[size/2,size],popupAnchor:[0,-(size+8)]});
+}
+function clubPopupHTML(club){
+  const date = calendarDate.value ? new Date(calendarDate.value+"T00:00:00") : new Date();
+  const nextEvt = nextEventText(club,date);
+  return `<div class="popup-card"><img src="${club.logo}"><div style="font-weight:700">${club.name}</div>${club.instagram?`<div style="margin-top:4px">@${club.instagram.replace("@","")}</div>`:""}<div class="small-muted">${nextEvt}</div></div>`;
+}
+function dateFromOffset(off){return new Date(start.getTime()+off*86400000);}
+function parseDateIso(s){return new Date(s+"T00:00:00");}
+function formatDate(d){return d.toLocaleString("default",{month:"short",day:"numeric"});}
+function nextEventText(club,date){
+  const future=[];
+  (club.games||[]).forEach(g=>{const d=parseDateIso(g.date); if(d>=date) future.push({date:d,type:g.type,label:"Game"});});
+  (club.practices||[]).forEach(p=>{const d=parseDateIso(p); if(d>=date) future.push({date:d,type:"practice",label:"Practice"});});
+  if(!future.length)return "No upcoming events";
+  future.sort((a,b)=>a.date-b.date);
+  const e=future[0]; return `${e.label}: ${formatDate(e.date)}`;
+}
+async function fetchCsv(url){const r=await fetch(PROXY+encodeURIComponent(url));if(!r.ok)throw new Error("Failed to fetch CSV"); const t=await r.text(); return Papa.parse(t,{header:true,skipEmptyLines:true}).data;}
+
+/* Load clubs & markers */
+async function loadClubs(){
+  clubListEl.textContent="Loading clubs...";
+  try{
+    const data=await fetchCsv(CLUB_SHEET_URL);
+    clubs=[]; markers.forEach(m=>map.removeLayer(m.marker)); markers=[]; clubListEl.innerHTML="";
+    for(const row of data){
+      const name=(row.Name||row.Club||"").trim();
+      const lat=parseFloat(row.Latitude), lon=parseFloat(row.Longitude);
+      if(!name||isNaN(lat)||isNaN(lon)) continue;
+      let logo=(row.Logo||row["Logo URL"]||row.Image||"").trim();
+      if(!logo.startsWith("http")) logo="https://aussierulesusa.com/wp-content/uploads/2024/05/placeholder.png";
+      const insta=(row.InstagramHandle||"").trim(); 
+      const club={name,lat,lon,logo,instagram:insta,games:[],practices:[]};
+      clubs.push(club);
+      const marker=L.marker([lat,lon],{icon:makeLogoIcon(club.logo)});
+      
+      /* hover popups */
+      marker.on("mouseover",()=>{marker.openPopup(); marker.getElement().style.opacity=1;});
+      marker.on("mouseout",()=>{if(lastClickedMarker!==marker) marker.closePopup(); if(lastClickedMarker!==marker) marker.getElement().style.opacity=0.8;});
+      /* click keeps popup open */
+      marker.on("click",()=>{
+        if(lastClickedMarker && lastClickedMarker!==marker){
+          lastClickedMarker.closePopup();
+          lastClickedMarker.getElement().classList.remove("clicked");
+        }
+        lastClickedMarker = marker;
+        marker.openPopup(); 
+        marker.getElement().classList.add("clicked");
+      });
+      
+      marker.bindPopup(clubPopupHTML(club),{closeButton:false});
+      marker.addTo(map);
+      markers.push({club,marker});
+      
+      const el=document.createElement("div"); el.className="club-item"; el.innerHTML=`<img src="${club.logo}"><div style="flex:1">${club.name}</div>`;
+      el.onclick=()=>{map.flyTo([club.lat,club.lon],6); marker.fire("click");};
+      clubListEl.appendChild(el);
+    }
+    clubsCount.textContent=`${clubs.length}`;
+    if(!clubs.length) clubListEl.textContent="No clubs found in sheet.";
+  }catch(err){ console.error(err); clubListEl.textContent="Error loading clubs.";}
+}
+
+/* Load events */
+async function loadEvents(){
+  try{
+    const data=await fetchCsv(EVENTS_SHEET_URL);
+    for(const ev of data){
+      const club=clubs.find(c=>c.name===ev.Club); if(!club) continue;
+      const type=(ev.EventType||"").toLowerCase();
+      if(type==="game"){const category=(ev.EventCategory||"club-metro").toLowerCase(); (club.games||=[]).push({date:ev.Date,type:category,title:ev.Title||""});}
+      else if(type==="practice") (club.practices||=[]).push(ev.Date);
+    }
+  }catch(err){console.error("Events load failed",err);}
+}
+
+/* build ticker (next 5 months) */
+function buildTicker(){
+  const items=[]; 
+  const today=new Date(); 
+  const cutoff=new Date(today.getTime()+(5*30*24*60*60*1000));
+  clubs.forEach(c=>{
+    (c.games||[]).forEach(g=>{const d=parseDateIso(g.date); if(d>=today&&d<=cutoff) items.push(`${formatDate(d)} — ${c.name} — ${g.type.replace("-"," ")}`);});
+    (c.practices||[]).forEach(p=>{const d=parseDateIso(p); if(d>=today&&d<=cutoff) items.push(`${formatDate(d)} — ${c.name} — practice`);});
+  });
+  items.sort((a,b)=>new Date(a.split(" — ")[0])-new Date(b.split(" — ")[0]));
+  return items.length?items:["No upcoming events in the next 5 months"];
+}
+let tickerItems=[],tickerIndex=0;
+function startTicker(){ 
+  tickerItems=buildTicker(); 
+  tickerIndex=0; 
+  tickerText.textContent=tickerItems[0]||""; 
+  setInterval(()=>{
+    tickerIndex=(tickerIndex+1)%tickerItems.length; 
+    tickerText.textContent=tickerItems[tickerIndex]; 
+  },3500);
+}
+
+function refreshIcons(){markers.forEach(({club,marker})=>marker.setIcon(makeLogoIcon(club.logo)));}
+
+/* show all clubs */
+function showAllClubs(){markers.forEach(({club,marker})=>{marker.setIcon(makeLogoIcon(club.logo)); marker.addTo(map); marker.bindPopup(clubPopupHTML(club),{closeButton:false});});}
+
+/* update events for selected date */
+function updateEventsByDate(selectedDate){
+  markers.forEach(({marker,club})=>{
+    marker.remove();
+    let show=false,color="",useLogo=club.logo;
+    (club.games||[]).forEach(g=>{if((eventType==="all"||eventType==="games")&&g.date===selectedDate.toISOString().slice(0,10)){show=true;color=gameColors[g.type]||gameColors["club-metro"]; if(g.type==="league-tournament") useLogo=usaflLogo;}});
+    (club.practices||[]).forEach(p=>{if((eventType==="all"||eventType==="practices")&&p===selectedDate.toISOString().slice(0,10)){show=true;color=practiceColor;}});
+    if(show){marker.setIcon(makeLogoIcon(useLogo,color)); marker.addTo(map); marker.bindPopup(clubPopupHTML(club),{closeButton:false});}
+  });
+}
+
+/* UI Events */
+clubsToggle.onclick=()=>{
+  clubsContent.hidden=!clubsContent.hidden; 
+  eventsContent.hidden=true; 
+  calendarContainer.style.display="none";
+  document.getElementById("eventsSidebar").style.top = clubsContent.hidden?"120px":(60+clubsContent.offsetHeight+12)+"px"; 
+  mode="clubs"; showAllClubs();
+}
+eventsToggle.onclick=()=>{
+  eventsContent.hidden=!eventsContent.hidden; 
+  calendarContainer.style.display = !eventsContent.hidden ? "block" : "none";
+  if(!eventsContent.hidden){
+    clubsContent.hidden=true; 
+    mode="events"; 
+    const allDates=[];
+    clubs.forEach(c=>{(c.games||[]).forEach(g=>allDates.push(parseDateIso(g.date))); (c.practices||[]).forEach(p=>allDates.push(parseDateIso(p)));});
+    if(allDates.length){allDates.sort((a,b)=>a-b); calendarDate.value=allDates[0].toISOString().slice(0,10); calendarDate.dispatchEvent(new Event("change"));}
+  }
+};
+
+function setType(t){eventType=t; gamesBtn.classList.toggle("active",t==="games"); practicesBtn.classList.toggle("active",t==="practices"); allBtn.classList.toggle("active",t==="all"); updateEventsByDate(parseDateIso(calendarDate.value));}
+gamesBtn.onclick=()=>setType("games"); practicesBtn.onclick=()=>setType("practices"); allBtn.onclick=()=>setType("all");
+
+calendarDate.addEventListener("change",(e)=>{const d=parseDateIso(e.target.value); if(mode==="events") updateEventsByDate(d);});
+
+map.on("zoomend",()=>{refreshIcons(); if(mode==="events") updateEventsByDate(parseDateIso(calendarDate.value));});
+
+/* INIT */
+(async function init(){ await loadClubs(); await loadEvents(); startTicker(); showAllClubs(); })();
+
+</script>
+</body>
+</html>
