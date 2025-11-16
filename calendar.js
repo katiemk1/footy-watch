@@ -1,113 +1,59 @@
 // calendar.js
-// -----------------------------------
-// Module for custom calendar
-// -----------------------------------
+export let calendarDateObj = new Date();
+let selectedDate = null;
+let onDayClickCallback = null;  // optional callback for main.js
 
-import { parseDateIso, toIsoDate } from './utils.js'; // optional if you want to keep utils separate
-
-// DOM
 const calendarContainer = document.getElementById("calendarContainer");
 const calendarGrid = document.getElementById("calendarGrid");
-const calMonthLabel = document.getElementById("calMonthLabel");
-const calPrevBtn = document.getElementById("calPrev");
-const calNextBtn = document.getElementById("calNext");
-const calNextEventBtn = document.getElementById("calNextEventBtn");
+const monthLabel = document.getElementById("monthLabel");
 
-// Module state
-let calCurrentMonth = new Date();
-let eventType = "all";
+export function renderCalendar() {
+    if (!calendarGrid) return;
+    calendarGrid.innerHTML = "";
+    const year = calendarDateObj.getFullYear();
+    const month = calendarDateObj.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-// External state references from main.js (to be set after import)
-export let clubsRef = [];
-export let eventsRef = [];
-export let updateEventsByDate = null;
-export let modeRef = null;
+    monthLabel.textContent = calendarDateObj.toLocaleString("default", { month: "long", year: "numeric" });
 
-// -----------------------------------
-// Utilities
-function getAllEventDates(){
-    const dates = new Set();
-    clubsRef.forEach(c=>{
-        (c.games||[]).forEach(ev=>dates.add(ev.date));
-        (c.practices||[]).forEach(ev=>dates.add(ev.date));
-    });
-    eventsRef.forEach(ev=>{
-        if((ev.Club||"").trim().toLowerCase()==="usafl" && ev.Date) dates.add(ev.Date);
-    });
-    return Array.from(dates);
-}
-
-// -----------------------------------
-// Calendar rendering
-export function renderCalendar(){
-    if(!calendarGrid) return;
-
-    calendarGrid.innerHTML="";
-    const y=calCurrentMonth.getFullYear();
-    const m=calCurrentMonth.getMonth();
-    calMonthLabel.textContent=calCurrentMonth.toLocaleString("default",{month:"long",year:"numeric"});
-
-    const first=new Date(y,m,1);
-    const startDay=first.getDay();
-    const lastDate=new Date(y,m+1,0).getDate();
-
-    const eventDates=getAllEventDates();
-
-    // pad empty days
-    for(let i=0;i<startDay;i++){
-        const pad=document.createElement("div");
-        calendarGrid.appendChild(pad);
-    }
-
-    // render days
-    for(let d=1; d<=lastDate; d++){
-        const iso=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-        const cell=document.createElement("div");
-        cell.className="calendarDay";
-        cell.textContent=d;
-
-        if(iso===new Date().toISOString().slice(0,10)) cell.classList.add("today");
-        if(eventDates.includes(iso)) cell.classList.add("event");
-
-        cell.onclick=()=>{
-            if(modeRef && modeRef.value==="events" && updateEventsByDate){
-                updateEventsByDate(parseDateIso(iso));
-            }
-        };
+    // Previous month blanks
+    for (let i = 0; i < firstDay; i++) {
+        const cell = document.createElement("div");
+        cell.className = "calendar-day disabled";
         calendarGrid.appendChild(cell);
     }
 
-    calendarContainer.style.display = "block";
+    for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement("div");
+        cell.className = "calendar-day";
+        cell.textContent = d;
+
+        const cellDate = new Date(year, month, d);
+        if (selectedDate && cellDate.toDateString() === selectedDate.toDateString()) {
+            cell.classList.add("selected");
+        }
+
+        cell.addEventListener("click", () => {
+            selectedDate = cellDate;
+            renderCalendar();
+            if (onDayClickCallback) onDayClickCallback(selectedDate);
+        });
+
+        calendarGrid.appendChild(cell);
+    }
 }
 
-// -----------------------------------
-// Month navigation
-calPrevBtn.onclick = () => { calCurrentMonth.setMonth(calCurrentMonth.getMonth()-1); renderCalendar(); };
-calNextBtn.onclick = () => { calCurrentMonth.setMonth(calCurrentMonth.getMonth()+1); renderCalendar(); };
-
-// -----------------------------------
-// Next event button
-calNextEventBtn.onclick = () => {
-    const todayIso = new Date().toISOString().slice(0,10);
-    const future = getAllEventDates().filter(d => d >= todayIso).sort();
-    if(future.length){
-        const nextIso = future[0];
-        const dt = parseDateIso(nextIso);
-        calCurrentMonth = new Date(dt.getFullYear(), dt.getMonth(), 1);
-        renderCalendar();
-        if(modeRef && modeRef.value==="events" && updateEventsByDate){
-            updateEventsByDate(dt);
-        }
-    }
-};
-
-// -----------------------------------
-// Event type filter
-export function setEventType(type){
-    eventType=type;
+export function renderCalendarFor(dateObj) {
+    calendarDateObj = dateObj;
     renderCalendar();
 }
 
-export function clearMarkers(){
-    calendarContainer.style.display = "none";
+export function updateCalendarVisibility() {
+    if (!calendarContainer) return;
+    calendarContainer.style.display = document.getElementById("eventsContent")?.hidden ? "none" : "block";
+}
+
+export function setDayClickCallback(cb) {
+    onDayClickCallback = cb;
 }
