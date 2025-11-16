@@ -1,7 +1,7 @@
 // main.js
-import { initCalendar, prevMonth, nextMonth, jumpToNextEvent, setClubsAndEvents } from './calendar.js';
+import { initCalendar, prevMonth, nextMonth, jumpToNextEvent, setClubsAndEvents } from "./calendar.js";
 
-// DOM
+// DOM elements
 const calendarGrid = document.getElementById("calendarGrid");
 const calMonthLabel = document.getElementById("calMonthLabel");
 const clubsToggle = document.getElementById("clubsToggle");
@@ -13,34 +13,35 @@ const tickerText = document.getElementById("tickerText");
 const clubsCount = document.getElementById("clubsCount");
 
 let map, clubs = [], events = [];
-let lastClickedMarker = null;
-let mode = "clubs";
-let eventType = "all";
 let markers = [];
 let tempEventMarkers = [];
+let mode = "clubs";
+let eventType = "all";
 
 // Initialize map
 map = L.map("map").setView([39.5, -85], 4);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "&copy; OpenStreetMap contributors"
+  attribution: "&copy; OpenStreetMap contributors",
 }).addTo(map);
 
-// Calendar
+// Initialize calendar
 initCalendar(calendarGrid, calMonthLabel, updateEventsByDate);
 
-// CSV fetch helper
+// Fetch CSV helper
 async function fetchCsv(url) {
-  const r = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
-  if (!r.ok) throw new Error("Fetch failed: " + r.status);
-  const text = await r.text();
+  const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+  if (!response.ok) throw new Error("CSV fetch failed: " + response.status);
+  const text = await response.text();
   return Papa.parse(text, { header: true, skipEmptyLines: true }).data;
 }
 
-// Load clubs
+// Load clubs from Google Sheets CSV
 async function loadClubs() {
   clubListEl.textContent = "Loading clubs…";
   try {
-    const data = await fetchCsv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ2pBQSzKGgCOYPtXyCnC-WOkn-N_6rzjgXPJg3icI-OtgESyHp2WDAPgtYXj_4F0NDNhTfT-zi82cx/pub?output=csv");
+    const data = await fetchCsv(
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ2pBQSzKGgCOYPtXyCnC-WOkn-N_6rzjgXPJg3icI-OtgESyHp2WDAPgtYXj_4F0NDNhTfT-zi82cx/pub?output=csv"
+    );
     clubs = [];
     markers.forEach(m => map.removeLayer(m.marker));
     markers = [];
@@ -50,17 +51,20 @@ async function loadClubs() {
       const lat = parseFloat(row.Latitude);
       const lon = parseFloat(row.Longitude);
       if (!lat || !lon) continue;
+
       const club = {
         name: row.Name || row.Club,
-        lat, lon,
-        logo: row.Logo || "https://upload.wikimedia.org/wikipedia/en/e/ec/USAFL_logo.png",
+        lat,
+        lon,
+        logo: row.Logo || "https://aussierulesusa.com/wp-content/uploads/2024/05/placeholder.png",
+        games: row.Games ? JSON.parse(row.Games) : [],
+        practices: row.Practices ? JSON.parse(row.Practices) : [],
         instagram: row.InstagramHandle || "",
-        games: [], practices: []
       };
       clubs.push(club);
 
       const marker = L.marker([lat, lon]).addTo(map);
-      marker.bindPopup(`<strong>${club.name}</strong>`);
+      marker.bindPopup(`<b>${club.name}</b>`);
       markers.push({ club, marker });
 
       const li = document.createElement("div");
@@ -72,24 +76,24 @@ async function loadClubs() {
       };
       clubListEl.appendChild(li);
     }
+
     clubsCount.textContent = clubs.length;
     setClubsAndEvents(clubs, events);
-  } catch(e) {
+  } catch (e) {
     console.error(e);
     clubListEl.textContent = "Error loading clubs";
   }
 }
 
-// Load events
+// Load events from Google Sheets CSV
 async function loadEvents() {
   try {
-    const data = await fetchCsv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ23xarhIttcDfoXomCljmxYJo59Fb6Xqbw3wcFcj-gkLena0UTY1-BR5keuQx71h_zLrKsy_cV8aFg/pub?output=csv");
-    events = data.map(ev => ({
-      ...ev,
-      Date: normalizeDate(ev.Date)
-    }));
+    const data = await fetchCsv(
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ23xarhIttcDfoXomCljmxYJo59Fb6Xqbw3wcFcj-gkLena0UTY1-BR5keuQx71h_zLrKsy_cV8aFg/pub?output=csv"
+    );
+    events = data;
     setClubsAndEvents(clubs, events);
-  } catch(e) {
+  } catch (e) {
     console.error(e);
   }
 }
@@ -102,30 +106,44 @@ document.getElementById("calNextEventBtn").onclick = jumpToNextEvent;
 // Sidebar toggles
 clubsToggle.onclick = () => {
   clubsContent.hidden = !clubsContent.hidden;
-  if (clubsContent.hidden) mode = "events";
+  if (!clubsContent.hidden) eventsContent.hidden = true;
 };
+
 eventsToggle.onclick = () => {
-  const opening = eventsContent.hidden;
-  if (opening) clubsContent.hidden = true;
   eventsContent.hidden = !eventsContent.hidden;
-  mode = eventsContent.hidden ? "clubs" : "events";
+  if (!eventsContent.hidden) {
+    clubsContent.hidden = true;
+    document.getElementById("calendarContainer").style.display = "block";
+  } else {
+    document.getElementById("calendarContainer").style.display = "none";
+  }
 };
 
-// Filters
-document.getElementById("gamesBtn").onclick = () => { eventType="games"; };
-document.getElementById("practicesBtn").onclick = () => { eventType="practices"; };
-document.getElementById("allBtn").onclick = () => { eventType="all"; };
+// Event type filters
+document.getElementById("gamesBtn").onclick = () => setEventType("games");
+document.getElementById("practicesBtn").onclick = () => setEventType("practices");
+document.getElementById("allBtn").onclick = () => setEventType("all");
 
-// Update events for selected date
+function setEventType(type) {
+  eventType = type;
+  document.getElementById("gamesBtn").classList.toggle("active", type === "games");
+  document.getElementById("practicesBtn").classList.toggle("active", type === "practices");
+  document.getElementById("allBtn").classList.toggle("active", type === "all");
+  updateEventsByDate(new Date());
+}
+
+// Update events markers for selected date
 function updateEventsByDate(date) {
+  markers.forEach(m => map.removeLayer(m.marker));
   tempEventMarkers.forEach(m => map.removeLayer(m));
   tempEventMarkers = [];
 
-  const iso = date.toISOString().slice(0,10);
+  const iso = date.toISOString().slice(0, 10);
+
   clubs.forEach(c => {
     let show = false;
-    (c.games||[]).forEach(ev => { if (normalizeDate(ev.date) === iso) show = true; });
-    (c.practices||[]).forEach(ev => { if (normalizeDate(ev.date) === iso) show = true; });
+    (c.games || []).forEach(ev => { if (ev.date === iso) show = true; });
+    (c.practices || []).forEach(ev => { if (ev.date === iso) show = true; });
     if (show) {
       const marker = L.marker([c.lat, c.lon]).addTo(map);
       tempEventMarkers.push(marker);
@@ -133,14 +151,7 @@ function updateEventsByDate(date) {
   });
 }
 
-function normalizeDate(input) {
-  if (!input) return null;
-  const d = new Date(input);
-  if (isNaN(d)) return input; 
-  return d.toISOString().slice(0,10);
-}
-
-// Initialize everything
+// Initialize
 (async function init() {
   await loadClubs();
   await loadEvents();

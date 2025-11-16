@@ -1,50 +1,52 @@
 // calendar.js
-export let calCurrentMonth = new Date();  
-
+export let calCurrentMonth = new Date();
 let calendarGrid, calMonthLabel;
-let clubs = [], events = [], updateEventsByDateFn;
+let clubs = [], events = [];
+let updateEventsByDateFn;
 
-export function initCalendar(gridEl, monthLabelEl, updateEventsByDateCallback) {
+export function initCalendar(gridEl, monthLabelEl, updateFn) {
   calendarGrid = gridEl;
   calMonthLabel = monthLabelEl;
-  updateEventsByDateFn = updateEventsByDateCallback;
+  updateEventsByDateFn = updateFn;
   renderCalendar();
 }
 
 export function setClubsAndEvents(clubsData, eventsData) {
   clubs = clubsData;
-  events = eventsData.map(ev => ({ ...ev, Date: normalizeDate(ev.Date) }));
+  events = eventsData;
 }
 
 export function renderCalendar() {
   if (!calendarGrid || !calMonthLabel) return;
 
   calendarGrid.innerHTML = "";
-  const y = calCurrentMonth.getFullYear();
-  const m = calCurrentMonth.getMonth();
+  const year = calCurrentMonth.getFullYear();
+  const month = calCurrentMonth.getMonth();
 
-  calMonthLabel.textContent = calCurrentMonth.toLocaleString("default", { month:"long", year:"numeric" });
+  calMonthLabel.textContent = calCurrentMonth.toLocaleString("default", {
+    month: "long",
+    year: "numeric",
+  });
 
-  const first = new Date(y, m, 1);
-  const startDay = first.getDay();
-  const lastDate = new Date(y, m+1, 0).getDate();
+  const firstDay = new Date(year, month, 1).getDay();
+  const lastDate = new Date(year, month + 1, 0).getDate();
 
   const eventDates = getAllEventDates();
 
-  // pad empty days
-  for (let i=0; i<startDay; i++){
+  // Add padding for empty days
+  for (let i = 0; i < firstDay; i++) {
     const pad = document.createElement("div");
     pad.className = "calendarDay disabled";
     calendarGrid.appendChild(pad);
   }
 
-  for (let d=1; d<=lastDate; d++){
-    const iso = `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  for (let d = 1; d <= lastDate; d++) {
+    const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
     const cell = document.createElement("div");
     cell.className = "calendarDay";
     cell.textContent = d;
 
-    if (iso === new Date().toISOString().slice(0,10)) cell.classList.add("today");
+    if (iso === new Date().toISOString().slice(0, 10)) cell.classList.add("today");
     if (eventDates.includes(iso)) cell.classList.add("event");
 
     cell.onclick = () => {
@@ -66,33 +68,24 @@ export function nextMonth() {
 }
 
 export function jumpToNextEvent() {
-  const future = getAllEventDates().filter(d => d >= new Date().toISOString().slice(0,10));
-  if (future.length) {
-    const nextDate = new Date(future[0]);
-    calCurrentMonth = new Date(nextDate.getFullYear(), nextDate.getMonth(), 1);
-    renderCalendar();
-    if (updateEventsByDateFn) updateEventsByDateFn(nextDate);
-  }
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const futureDates = getAllEventDates().filter(d => d >= todayISO);
+  if (!futureDates.length) return;
+
+  const nextDate = new Date(futureDates[0]);
+  calCurrentMonth = new Date(nextDate.getFullYear(), nextDate.getMonth(), 1);
+  renderCalendar();
+  if (updateEventsByDateFn) updateEventsByDateFn(nextDate);
 }
 
 function getAllEventDates() {
   const dates = new Set();
-
   clubs.forEach(club => {
-    (club.games || []).forEach(ev => dates.add(normalizeDate(ev.date)));
-    (club.practices || []).forEach(ev => dates.add(normalizeDate(ev.date)));
+    (club.games || []).forEach(ev => ev.date && dates.add(ev.date));
+    (club.practices || []).forEach(ev => ev.date && dates.add(ev.date));
   });
-
   events.forEach(ev => {
-    if (ev.Date) dates.add(normalizeDate(ev.Date));
+    if ((ev.Club || "").trim().toLowerCase() === "usafl" && ev.Date) dates.add(ev.Date);
   });
-
-  return Array.from(dates);
-}
-
-function normalizeDate(input) {
-  if (!input) return null;
-  const d = new Date(input);
-  if (isNaN(d)) return input; 
-  return d.toISOString().slice(0,10);
+  return Array.from(dates).sort();
 }
