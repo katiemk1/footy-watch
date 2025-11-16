@@ -40,7 +40,7 @@ async function fetchCsv(url) {
 async function loadClubs() {
   clubListEl.textContent = "Loading clubs…";
   try {
-    const data = await fetchCsv("YOUR_CLUB_SHEET_CSV_URL_HERE");
+    const data = await fetchCsv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ2pBQSzKGgCOYPtXyCnC-WOkn-N_6rzjgXPJg3icI-OtgESyHp2WDAPgtYXj_4F0NDNhTfT-zi82cx/pub?output=csv");
     clubs = [];
     markers.forEach(m => map.removeLayer(m.marker));
     markers = [];
@@ -83,7 +83,7 @@ async function loadClubs() {
 // Load events
 async function loadEvents() {
   try {
-    const data = await fetchCsv("YOUR_EVENTS_SHEET_CSV_URL_HERE");
+    const data = await fetchCsv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQ23xarhIttcDfoXomCljmxYJo59Fb6Xqbw3wcFcj-gkLena0UTY1-BR5keuQx71h_zLrKsy_cV8aFg/pub?output=csv");
     events = data.map(ev => ({
       ...ev,
       Date: normalizeDate(ev.Date)
