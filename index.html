@@ -1,12 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sports Watch — USAFL Women's Footy Map</title>
 
+<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
+<!-- Custom Styles -->
 <style>
 :root{
   --card-bg: rgba(255,255,255,0.95);
@@ -14,99 +16,71 @@
   --muted: #6b6b6b;
   --panel-w: 300px;
 }
-/* base */
-html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-#map{height:100%;width:100%;}
+html, body { height: 100%; margin: 0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+#map { height: 100%; width: 100%; }
 
-/* ticker - full width, semi-transparent */
-#ticker {
-  position:absolute; top:0; left:0; width:100%; z-index:1600; pointer-events:none;
-}
-.ticker-card {
-  margin:8px auto;
-  background: rgba(11,102,178,0.75);
-  color: white;
-  padding: 10px 16px;
-  width:100%;
-  max-width:1200px;
-  display:flex; align-items:center; justify-content:center;
-  gap:12px;
-  pointer-events:auto;
-  box-shadow:0 6px 20px rgba(0,0,0,0.2);
-  font-weight:700;
-  border-radius:10px;
-}
+/* Ticker */
+#ticker { position:absolute; top:0; left:0; width:100%; z-index:1600; pointer-events:none; }
+.ticker-card { margin:8px auto; background: rgba(11,102,178,0.75); color:white; padding:10px 16px; width:100%; max-width:1200px; display:flex; align-items:center; justify-content:center; gap:12px; pointer-events:auto; box-shadow:0 6px 20px rgba(0,0,0,0.2); font-weight:700; border-radius:10px; }
 
-/* Move zoom buttons below ticker */
+/* Leaflet zoom below ticker */
 .leaflet-top.leaflet-left { top:70px !important; }
 
 /* Sidebars */
-.sidebar {
-  position:absolute; right:12px; z-index:1500; width:var(--panel-w); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.18);
-  overflow:hidden; background:var(--card-bg);
-}
-#clubsSidebar{ top:70px; }
-#eventsSidebar{ top:128px; transition:top .28s ease; }
+.sidebar { position:absolute; right:12px; z-index:1500; width:var(--panel-w); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.18); overflow:hidden; background:var(--card-bg); }
+#clubsSidebar { top:70px; }
+#eventsSidebar { top:128px; transition: top .28s ease; }
 
-.sidebar-header{
-  background:linear-gradient(90deg,var(--ui-accent),#114b7a);
-  color:white; padding:8px 12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between;
-}
-.sidebar-content{ padding:10px; max-height:360px; overflow:auto; }
-.club-item{ display:flex; align-items:center; gap:8px; padding:8px; border-radius:8px; cursor:pointer; }
-.club-item:hover{ background: #f3f6fb; }
-.club-item img{ width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+.sidebar-header { background: linear-gradient(90deg,var(--ui-accent),#114b7a); color:white; padding:8px 12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:space-between; }
+.sidebar-content { padding:10px; max-height:360px; overflow:auto; }
+.club-item { display:flex; align-items:center; gap:8px; padding:8px; border-radius:8px; cursor:pointer; }
+.club-item:hover { background:#f3f6fb; }
+.club-item img { width:28px; height:28px; border-radius:50%; object-fit:cover; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
 
 .controls { display:flex; gap:8px; margin-bottom:8px; }
-.btn { padding:6px 8px;border-radius:8px;border:none;cursor:pointer;background:#e6eef8;color:#06345f;font-weight:700; }
-.btn.active { background:var(--ui-accent); color:white; }
+.btn { padding:6px 8px; border-radius:8px; border:none; cursor:pointer; background:#e6eef8; color:#06345f; font-weight:700; }
+.btn.active { background: var(--ui-accent); color:white; }
 
 .legend { font-size:13px; color:var(--muted); margin-top:8px; }
-.legend-item{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-.legend-dot{ width:12px;height:12px;border-radius:50%;display:inline-block; }
+.legend-item { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.legend-dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
 
-/* calendar (custom) */
-#calendarContainer{
-  position:absolute; bottom:12px; right:12px; z-index:1500; background:var(--card-bg); border-radius:10px; padding:10px; box-shadow:0 6px 18px rgba(0,0,0,0.18);
-  display:none; width:290px;
-}
-#calendarHeader{ display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:8px;}
-#calendarHeader .controls { margin:0; }
-#calendarGrid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
-.calendar-day { padding:6px 6px; text-align:center; border-radius:6px; cursor:pointer; font-size:13px; }
-.calendar-day.disabled { color:#bbb; cursor:default; background:transparent; }
-.calendar-day.hasEvent { font-weight:700; background: linear-gradient(180deg, rgba(11,102,178,0.06), rgba(11,102,178,0.03)); border:1px solid rgba(11,102,178,0.12); }
-.calendar-day.selected { background: var(--ui-accent); color:white; box-shadow: 0 6px 12px rgba(11,102,178,0.18); }
+/* Calendar */
+#calendarContainer { position:absolute; bottom:12px; right:12px; width:260px; background:var(--card-bg); border-radius:12px; padding:10px; box-shadow:0 8px 24px rgba(0,0,0,0.2); font-size:14px; display:none; }
+#calendarHeader { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-weight:700; }
+.calNav { background:#e6eef8; border:none; padding:4px 8px; border-radius:8px; cursor:pointer; font-weight:700; }
+#calendarGrid { display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; }
+.calendarDay { background:white; border-radius:6px; padding:6px 4px; text-align:center; cursor:pointer; border:1px solid #ccd7e2; }
+.calendarDay:hover { background:#dcecff; }
+.calendarDay.event { background:#0b66b2; color:white; font-weight:700; }
+.calendarDay.today { border:2px solid #0b66b2; }
+.calNextEvent { margin-top:10px; width:100%; padding:6px; border:none; border-radius:8px; background:#0b66b2; color:white; font-weight:700; cursor:pointer; }
 
-/* popup card (compact for hover & click) */
-.popup-card{
-  text-align:center;
-  width:170px;
-  font-size:13px;
-  padding:6px;
-}
-.popup-card img{ width:48px;height:48px;border-radius:50%;display:block;margin:0 auto 6px;box-shadow:0 4px 12px rgba(0,0,0,0.18); }
-.small-muted{ font-size:12px;color:#666;margin-top:4px; }
+/* popup */
+.popup-card { text-align:center; width:170px; font-size:13px; padding:6px; }
+.popup-card img { width:48px; height:48px; border-radius:50%; display:block; margin:0 auto 6px; box-shadow:0 4px 12px rgba(0,0,0,0.18); }
+.small-muted { font-size:12px; color:#666; margin-top:4px; }
 
-/* subtle transparency for clustered icons (class applied) */
-.icon-fade { opacity: 0.72; filter: grayscale(6%); }
+/* fade icons */
+.icon-fade { opacity:0.72; filter:grayscale(6%); }
 
 /* responsive */
 @media(max-width:900px){
-  .sidebar{ right:8px; width:260px; }
-  #calendarContainer{ right:8px; bottom:8px; width:260px; }
+  .sidebar { right:8px; width:260px; }
+  #calendarContainer { right:8px; bottom:8px; width:260px; }
   .ticker-card { max-width: calc(100% - 24px); margin:8px; }
 }
 </style>
 </head>
 <body>
 
+<!-- Map -->
 <div id="map"></div>
 
-<!-- ticker -->
+<!-- Ticker -->
 <div id="ticker"><div class="ticker-card"><div id="tickerText">Loading upcoming events…</div></div></div>
 
-<!-- Clubs sidebar -->
+<!-- Clubs Sidebar -->
 <div id="clubsSidebar" class="sidebar">
   <div class="sidebar-header" id="clubsToggle">Women’s Footy Clubs <span id="clubsCount" style="font-size:12px;opacity:.9"></span></div>
   <div id="clubsContent" class="sidebar-content" hidden>
@@ -114,7 +88,7 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
   </div>
 </div>
 
-<!-- Events sidebar -->
+<!-- Events Sidebar -->
 <div id="eventsSidebar" class="sidebar">
   <div class="sidebar-header" id="eventsToggle">Events</div>
   <div id="eventsContent" class="sidebar-content" hidden>
@@ -132,654 +106,22 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
   </div>
 </div>
 
-<!-- calendar -->
-<div id="calendarContainer" aria-hidden="true">
+<!-- Calendar -->
+<div id="calendarContainer">
   <div id="calendarHeader">
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button id="prevMonth" class="btn" title="Previous month">&lt;</button>
-      <div id="calendarMonth" style="font-weight:700;"></div>
-      <button id="nextMonth" class="btn" title="Next month">&gt;</button>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button id="nextEventBtn" class="btn" title="Jump to next event">Next</button>
-      <button id="todayBtn" class="btn" title="Jump to today">Today</button>
-    </div>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;font-weight:700;color:var(--muted);font-size:12px;">
-    <div style="text-align:center">Sun</div><div style="text-align:center">Mon</div><div style="text-align:center">Tue</div><div style="text-align:center">Wed</div><div style="text-align:center">Thu</div><div style="text-align:center">Fri</div><div style="text-align:center">Sat</div>
+    <button id="calPrev" class="calNav">&lt;</button>
+    <div id="calMonthLabel"></div>
+    <button id="calNext" class="calNav">&gt;</button>
   </div>
   <div id="calendarGrid"></div>
+  <button id="calNextEventBtn" class="calNextEvent">Next Event</button>
 </div>
 
-<!-- libs -->
+<!-- Scripts -->
+<script type="module" src="main.js"></script>
+<script type="module" src="calendar.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-<script type="module">
-/* CONFIG */
-const CLUB_SHEET_URL  = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ2pBQSzKGgCOYPtXyCnC-WOkn-N_6rzjgXPJg3icI-OtgESyHp2WDAPgtYXj_4F0NDNhTfT-zi82cx/pub?output=csv";
-const EVENTS_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ23xarhIttcDfoXomCljmxYJo59Fb6Xqbw3wcFcj-gkLena0UTY1-BR5keuQx71h_zLrKsy_cV8aFg/pub?output=csv";
-const PROXY = "https://api.allorigins.win/raw?url=";
-const REFRESH_MS = 5 * 60 * 1000; // 5 minutes
-
-/* app state */
-const start = new Date("2026-01-01");
-const end = new Date("2026-11-30");
-const gameColors = {"club-metro":"#66ccff","club-tournament":"#0077cc","league-tournament":"#003366"};
-const practiceColor = "#32cd32";
-const usaflLogo = "https://aussierulesusa.com/wp-content/uploads/2024/05/USAFL_logo.png";
-
-let clubs = [];      // {name, lat, lon, logo, instagram, games[], practices[]}
-let events = [];     // raw events rows
-let markers = [];    // {club, marker}
-let lastClickedMarker = null;
-let mode = "clubs";
-let eventType = "all";
-
-/* DOM */
-const clubListEl = document.getElementById("clubList");
-const clubsToggle = document.getElementById("clubsToggle");
-const clubsContent = document.getElementById("clubsContent");
-const eventsToggle = document.getElementById("eventsToggle");
-const eventsContent = document.getElementById("eventsContent");
-const gamesBtn = document.getElementById("gamesBtn");
-const practicesBtn = document.getElementById("practicesBtn");
-const allBtn = document.getElementById("allBtn");
-const tickerText = document.getElementById("tickerText");
-const clubsCount = document.getElementById("clubsCount");
-const calendarContainer = document.getElementById("calendarContainer");
-const calendarGrid = document.getElementById("calendarGrid");
-const calendarMonth = document.getElementById("calendarMonth");
-const prevMonthBtn = document.getElementById("prevMonth");
-const nextMonthBtn = document.getElementById("nextMonth");
-const nextEventBtn = document.getElementById("nextEventBtn");
-const todayBtn = document.getElementById("todayBtn");
-
-/* map centered slightly east per request */
-const map = L.map("map").setView([39.5, -85], 4);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors" }).addTo(map);
-
-/* utilities */
-const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
-function iconSizeForZoom(z){ return clamp(Math.round(30 + (z - 3) * 8), 28, 96); }
-function parseDateIso(s){ if(!s) return new Date(NaN); return new Date(s + "T00:00:00"); }
-function formatDate(d){ return d.toLocaleString("default", { month: "short", day: "numeric" }); }
-function toIsoDate(d){ return d.toISOString().slice(0,10); }
-
-/* icon generator */
-function makeLogoIcon(logoUrl, borderColor=null, opacity=1){
-  const z = map.getZoom();
-  const size = iconSizeForZoom(z);
-  const border = borderColor ? `border:3px solid ${borderColor};` : "border:2px solid rgba(255,255,255,0.95);";
-  const html = `
-    <div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;${opacity<1?`opacity:${opacity};`:``}">
-      <img src="${logoUrl}" style="width:${size-6}px;height:${size-6}px;object-fit:cover;${border}border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,0.12);">
-    </div>
-  `;
-  return L.divIcon({ html, className: "", iconSize: [size, size], iconAnchor: [size/2, size], popupAnchor: [0, -(size + 8)] });
-}
-
-/* popup HTML */
-function clubPopupHTML(club, selectedDateIso){
-  const insta = club.instagram ? `<div style="margin-top:4px"><a href="https://instagram.com/${club.instagram.replace(/^@/,"")}" target="_blank" rel="noopener noreferrer">${club.instagram}</a></div>` : "";
-  const next = nextEventText(club, parseDateIso(selectedDateIso || toIsoDate(new Date())));
-  return `<div class="popup-card">
-    <img src="${club.logo}" alt="${club.name}">
-    <div style="font-weight:700">${club.name}</div>
-    ${insta}
-    <div class="small-muted">${next}</div>
-  </div>`;
-}
-
-/* nextEvent text with Subtitle preference, and 'Tournament' mapping for club-tournament */
-function nextEventText(club, date){
-  const future = [];
-  (club.games || []).forEach(ev => {
-    const d = parseDateIso(ev.date);
-    if (d >= date) {
-      // label prefer Subtitle if exists; if category is club-tournament label 'Tournament'
-      let label = ev.subtitle || (ev.category === "club-tournament" ? "Tournament" : "Game");
-      future.push({ date: d, label });
-    }
-  });
-  (club.practices || []).forEach(ev => {
-    const d = parseDateIso(ev.date || ev);
-    if (d >= date) future.push({ date: d, label: ev.subtitle || "Practice" });
-  });
-  if (!future.length) return "No upcoming events";
-  future.sort((a,b) => a.date - b.date);
-  return `${future[0].label}: ${formatDate(future[0].date)}`;
-}
-
-/* CSV helper */
-async function fetchCsv(url){
-  const r = await fetch(PROXY + encodeURIComponent(url));
-  if (!r.ok) throw new Error("Fetch failed: " + r.status);
-  const text = await r.text();
-  return Papa.parse(text, { header: true, skipEmptyLines: true }).data;
-}
-
-/* LOAD CLUBS */
-async function loadClubs(){
-  clubListEl.textContent = "Loading clubs...";
-  try {
-    const data = await fetchCsv(CLUB_SHEET_URL);
-    clubs = [];
-    markers.forEach(m => map.removeLayer(m.marker));
-    markers = [];
-    clubListEl.innerHTML = "";
-
-    for (const row of data){
-      const rawName = (row.Name || row.Club || "").trim();
-      if (!rawName) continue;
-      if (rawName.toLowerCase() === "usafl") continue; // exclude USAFL from club list
-      const lat = parseFloat(row.Latitude);
-      const lon = parseFloat(row.Longitude);
-      if (Number.isNaN(lat) || Number.isNaN(lon)) continue;
-      let logo = (row.Logo || row["Logo URL"] || row.Image || row.LogoUrl || "").trim();
-      if (!logo.startsWith("http")) logo = "https://aussierulesusa.com/wp-content/uploads/2024/05/placeholder.png";
-      const insta = (row.InstagramHandle || "").trim();
-
-      const club = { name: rawName, lat, lon, logo, instagram: insta, games: [], practices: [] };
-      clubs.push(club);
-
-      const icon = makeLogoIcon(club.logo, null, 1);
-      const marker = L.marker([club.lat, club.lon], { icon }).addTo(map);
-      marker.bindPopup(clubPopupHTML(club), { closeButton: false });
-
-      marker.on("mouseover", () => { if (lastClickedMarker !== marker) marker.openPopup(); });
-      marker.on("mouseout", () => { if (lastClickedMarker !== marker) marker.closePopup(); });
-      marker.on("click", () => {
-        if (lastClickedMarker && lastClickedMarker !== marker) lastClickedMarker.closePopup();
-        lastClickedMarker = marker;
-        marker.openPopup();
-        map.flyTo([club.lat, club.lon], 6);
-      });
-
-      markers.push({ club, marker });
-
-      // sidebar item
-      const el = document.createElement("div");
-      el.className = "club-item";
-      el.innerHTML = `<img src="${club.logo}" alt="${club.name}"><div style="flex:1">${club.name}</div>`;
-      el.onclick = () => {
-        if (lastClickedMarker && lastClickedMarker !== marker) lastClickedMarker.closePopup();
-        lastClickedMarker = marker;
-        marker.openPopup();
-        map.flyTo([club.lat, club.lon], 6);
-      };
-      clubListEl.appendChild(el);
-    }
-
-    clubsCount.textContent = `${clubs.length}`;
-    if (!clubs.length) clubListEl.textContent = "No clubs found in sheet.";
-  } catch (err) {
-    console.error("loadClubs error", err);
-    clubListEl.textContent = "Error loading clubs.";
-  }
-}
-
-/* LOAD EVENTS (and attach to clubs) - events override coords if provided */
-async function loadEvents(){
-  try {
-    events = await fetchCsv(EVENTS_SHEET_URL);
-    // clear clubs' events
-    clubs.forEach(c => { c.games = []; c.practices = []; });
-
-    for (const ev of events){
-      const clubName = (ev.Club || "").trim();
-      if (!clubName) continue;
-      const type = (ev.EventType || "").toLowerCase();
-      const category = (ev.EventCategory || "club-metro").toLowerCase();
-      const subtitle = (ev.Subtitle || "").trim();
-      const title = (ev.Title || "").trim();
-      const evLat = ev.Latitude ? parseFloat(ev.Latitude) : null;
-      const evLon = ev.Longitude ? parseFloat(ev.Longitude) : null;
-      const eventObj = {
-        clubName, date: (ev.Date || "").trim(), type, category, subtitle: subtitle || null, title: title || "", lat: (evLat && evLon) ? evLat : null, lon: (evLat && evLon) ? evLon : null
-      };
-
-      const club = clubs.find(c => c.name === clubName);
-      if (club) {
-        if (type === "game") club.games.push(eventObj);
-        else if (type === "practice") club.practices.push(eventObj);
-      } else {
-        // keep in events array (already), used for USAFL special rendering
-      }
-    }
-  } catch (err) {
-    console.error("loadEvents error", err);
-  }
-}
-
-/* BUILD TICKER (next 5 months) */
-function buildTickerItems(){
-  const items = [];
-  const today = new Date();
-  const cutoff = new Date(today.getTime() + (5 * 30 * 24 * 60 * 60 * 1000));
-  clubs.forEach(c => {
-    (c.games || []).forEach(g => {
-      const d = parseDateIso(g.date);
-      if (d >= today && d <= cutoff) items.push(`${formatDate(d)} — ${c.name} — ${g.subtitle || (g.category === "club-tournament" ? "Tournament" : "Game")}`);
-    });
-    (c.practices || []).forEach(p => {
-      const d = parseDateIso(p.date || p);
-      if (d >= today && d <= cutoff) items.push(`${formatDate(d)} — ${c.name} — ${p.subtitle || "Practice"}`);
-    });
-  });
-  // USAFL events
-  events.forEach(ev => {
-    if ((ev.Club || "").trim().toLowerCase() === "usafl") {
-      const d = parseDateIso(ev.Date || "");
-      if (!isNaN(d) && d >= today && d <= cutoff) {
-        const label = `${formatDate(d)} — USAFL — ${ (ev.Subtitle && ev.Subtitle.trim()) || (ev.EventCategory || "league-tournament") }`;
-        items.push(label);
-      }
-    }
-  });
-  items.sort((a,b) => new Date(a.split(" — ")[0]) - new Date(b.split(" — ")[0]));
-  return items.length ? items : ["No upcoming events in the next 5 months"];
-}
-
-/* TICKER rotation every 5 seconds */
-let tickerItems = [], tickerIndex = 0, tickerTimer = null;
-function startTicker(){
-  tickerItems = buildTickerItems();
-  tickerIndex = 0;
-  tickerText.textContent = tickerItems[0] || "";
-  if (tickerTimer) clearInterval(tickerTimer);
-  tickerTimer = setInterval(() => {
-    tickerIndex = (tickerIndex + 1) % tickerItems.length;
-    tickerText.textContent = tickerItems[tickerIndex];
-  }, 5000);
-}
-
-/* Overlap fade logic - make icons slightly transparent if another icon is close */
-function applyOverlapFades(){
-  const threshold = 30000; // meters
-  for (const { club, marker } of markers){
-    let close = false;
-    for (const { club: other } of markers){
-      if (other === club) continue;
-      const d = map.distance([club.lat, club.lon], [other.lat, other.lon]);
-      if (d < threshold) { close = true; break; }
-    }
-    const opacity = close ? 0.75 : 1;
-    marker.setIcon(makeLogoIcon(club.logo, null, opacity));
-  }
-}
-
-/* refresh icons on zoom change (rescale) */
-function refreshIcons(){
-  markers.forEach(({ club, marker }) => {
-    // cannot read previous opacity reliably from icon markup, so re-run overlap fades afterwards
-    marker.setIcon(makeLogoIcon(club.logo, null, 1));
-  });
-  applyOverlapFades();
-}
-
-/* show all clubs (clubs-mode) */
-function showAllClubs(selectedDateIso){
-  // remove all from map
-  markers.forEach(({ marker }) => map.removeLayer(marker));
-  markers.forEach(({ club, marker }) => {
-    marker.setIcon(makeLogoIcon(club.logo, null, 1));
-    marker.setLatLng([club.lat, club.lon]); // ensure original coords
-    marker.addTo(map);
-    marker.bindPopup(clubPopupHTML(club, selectedDateIso), { closeButton: false });
-  });
-  applyOverlapFades();
-}
-
-/* temporary storage for USAFL markers placed for a given date */
-if (!window._tempEventMarkers) window._tempEventMarkers = [];
-
-/* update events markers for a selected date (events-mode), uses event override coords if provided */
-function updateEventsByDate(selectedDate){
-  // clear every club marker (we'll add back only those that match)
-  markers.forEach(({ marker }) => map.removeLayer(marker));
-  // remove previously created temp markers
-  window._tempEventMarkers.forEach(m => map.removeLayer(m));
-  window._tempEventMarkers = [];
-
-  const selectedIso = toIsoDate(selectedDate);
-
-  markers.forEach(({ club, marker }) => {
-    let show = false, color = null, useLat = club.lat, useLon = club.lon;
-    (club.games || []).forEach(ev => {
-      if ((eventType === "all" || eventType === "games") && ev.date === selectedIso) {
-        show = true; color = gameColors[ev.category] || gameColors["club-metro"];
-        if (ev.lat !== null && ev.lon !== null) { useLat = ev.lat; useLon = ev.lon; }
-      }
-    });
-    (club.practices || []).forEach(ev => {
-      if ((eventType === "all" || eventType === "practices") && (ev.date === selectedIso || (ev.date === undefined && ev === selectedIso))) {
-        show = true; color = practiceColor;
-        if (ev.lat !== null && ev.lon !== null) { useLat = ev.lat; useLon = ev.lon; }
-      }
-    });
-    if (show) {
-      marker.setLatLng([useLat, useLon]);
-      marker.setIcon(makeLogoIcon(club.logo, color, 1));
-      marker.addTo(map);
-      marker.bindPopup(clubPopupHTML(club, selectedIso), { closeButton: false });
-    }
-  });
-
-  // USAFL events (from events rows) for that date
-  events.forEach(ev => {
-    if ((ev.Club || "").trim().toLowerCase() !== "usafl") return;
-    if ((ev.Date || "").trim() !== selectedIso) return;
-    const lat = ev.Latitude ? parseFloat(ev.Latitude) : null;
-    const lon = ev.Longitude ? parseFloat(ev.Longitude) : null;
-    if (!lat || !lon || isNaN(lat) || isNaN(lon)) return;
-    const label = ev.Subtitle && ev.Subtitle.trim() ? ev.Subtitle.trim() : ev.Title || "USAFL event";
-    const icon = makeLogoIcon(usaflLogo, gameColors[(ev.EventCategory||"league-tournament").toLowerCase()] || gameColors["league-tournament"], 1);
-    const m = L.marker([lat, lon], { icon }).addTo(map);
-    m.bindPopup(`<div class="popup-card"><img src="${usaflLogo}"><div style="font-weight:700">${label}</div><div class="small-muted">USAFL event</div></div>`, { closeButton: false });
-    window._tempEventMarkers.push(m);
-  });
-}
-
-/* Auto-jump calendar to first event (respect filter) */
-function findNextEventDate(forFilter){
-  const allDates = [];
-  const today = new Date();
-  // club events
-  clubs.forEach(c => {
-    (c.games || []).forEach(g => {
-      if (forFilter === "games" || forFilter === "all") allDates.push({ d: parseDateIso(g.date), kind: "game" });
-    });
-    (c.practices || []).forEach(p => {
-      if (forFilter === "practices" || forFilter === "all") allDates.push({ d: parseDateIso(p.date || p), kind: "practice" });
-    });
-  });
-  // USAFL events from events[]
-  events.forEach(ev => {
-    if ((ev.Club || "").trim().toLowerCase() === "usafl") {
-      if (forFilter === "games" || forFilter === "all" || forFilter === "practices") {
-        allDates.push({ d: parseDateIso(ev.Date), kind: ev.EventType || "game" });
-      }
-    }
-  });
-  const future = allDates.filter(x => x.d && x.d >= today);
-  if (!future.length) return null;
-  future.sort((a,b) => a.d - b.d);
-  return toIsoDate(future[0].d);
-}
-
-/* ----- Custom calendar rendering ----- */
-let calendarDateObj = new Date(); // current displayed month
-function renderCalendarFor(dateObj){
-  calendarGrid.innerHTML = "";
-  const year = dateObj.getFullYear();
-  const month = dateObj.getMonth();
-  calendarMonth.textContent = dateObj.toLocaleString("default", { month: "long", year: "numeric" });
-
-  // first day of month
-  const first = new Date(year, month, 1);
-  const startDay = first.getDay(); // 0..6
-  // days in month
-  const daysInMonth = new Date(year, month+1, 0).getDate();
-
-  // Build a quick set of dates that have events (respecting eventType filter)
-  const hasEventSet = new Set();
-  const isoForDay = d => toIsoDate(d);
-  const today = new Date();
-  const cutoff = new Date(today.getTime() + (5 * 30 * 24 * 60 * 60 * 1000));
-  // include club events
-  clubs.forEach(c => {
-    (c.games || []).forEach(g => {
-      const d = parseDateIso(g.date);
-      if (d >= today && d <= cutoff) {
-        if (eventType === "all" || eventType === "games") hasEventSet.add(isoForDay(d));
-      }
-    });
-    (c.practices || []).forEach(p => {
-      const d = parseDateIso(p.date || p);
-      if (d >= today && d <= cutoff) {
-        if (eventType === "all" || eventType === "practices") hasEventSet.add(isoForDay(d));
-      }
-    });
-  });
-  // include USAFL events
-  events.forEach(ev => {
-    if ((ev.Club || "").trim().toLowerCase() === "usafl") {
-      const d = parseDateIso(ev.Date);
-      if (!isNaN(d) && d >= today && d <= cutoff) {
-        if (eventType === "all" || eventType === (ev.EventType||"game")) hasEventSet.add(isoForDay(d));
-      }
-    }
-  });
-
-  // render preceding empty slots
-  for (let i=0;i<startDay;i++){
-    const el = document.createElement("div");
-    el.className = "calendar-day disabled";
-    calendarGrid.appendChild(el);
-  }
-
-  // render days
-  for (let day = 1; day <= daysInMonth; day++){
-    const d = new Date(year, month, day);
-    const iso = isoForDay(d);
-    const el = document.createElement("div");
-    el.className = "calendar-day";
-    el.textContent = day;
-    // disabled if outside range
-    if (d < start || d > end) {
-      el.classList.add("disabled");
-    } else {
-      if (hasEventSet.has(iso)) el.classList.add("hasEvent");
-      el.addEventListener("click", () => {
-        // select day, jump to events on that date
-        // if disabled do nothing
-        if (d < start || d > end) return;
-        // visually mark selected
-        document.querySelectorAll("#calendarGrid .calendar-day").forEach(n => n.classList.remove("selected"));
-        el.classList.add("selected");
-        // show events on this date if events mode
-        if (mode === "events") updateEventsByDate(d);
-      });
-    }
-    calendarGrid.appendChild(el);
-  }
-}
-
-/* month navigation handlers */
-prevMonthBtn.addEventListener("click", () => {
-  calendarDateObj = new Date(calendarDateObj.getFullYear(), calendarDateObj.getMonth() - 1, 1);
-  renderCalendarFor(calendarDateObj);
-});
-nextMonthBtn.addEventListener("click", () => {
-  calendarDateObj = new Date(calendarDateObj.getFullYear(), calendarDateObj.getMonth() + 1, 1);
-  renderCalendarFor(calendarDateObj);
-});
-todayBtn.addEventListener("click", () => {
-  calendarDateObj = new Date();
-  renderCalendarFor(calendarDateObj);
-});
-
-/* Next Event button jumps to next event respecting filter */
-nextEventBtn.addEventListener("click", () => {
-  const nextIso = findNextEventDate(eventType);
-  if (!nextIso) return alert("No upcoming events found for that filter");
-  // set calendar viewport to that month and highlight day
-  const dt = parseDateIso(nextIso);
-  calendarDateObj = new Date(dt.getFullYear(), dt.getMonth(), 1);
-  renderCalendarFor(calendarDateObj);
-  // highlight day and call update
-  // find and click corresponding day element
-  const idx = dt.getDate();
-  setTimeout(() => {
-    const nodes = Array.from(document.querySelectorAll("#calendarGrid .calendar-day"));
-    // find n-th non-disabled day with text idx
-    for (const node of nodes) {
-      if (node.classList.contains("disabled")) continue;
-      if (parseInt(node.textContent,10) === idx) {
-        node.click();
-        break;
-      }
-    }
-  }, 10);
-});
-
-/* Events & UI handlers */
-
-/* toggle calendar display depending on eventsContent hidden flag */
-function toggleCalendarPanel(){
-  calendarContainer.style.display = eventsContent.hidden ? "none" : "block";
-  calendarContainer.setAttribute("aria-hidden", eventsContent.hidden ? "true" : "false");
-}
-
-/* UI bindings -------------------------------------------------- */
-
-/* show/hide calendar based on events panel */
-function updateCalendarVisibility() {
-  calendarContainer.style.display = eventsContent.hidden ? "none" : "block";
-}
-
-/* whenever the clubs panel changes height, reposition events panel */
-function repositionEventsSidebar() {
-  if (clubsContent.hidden) {
-    // clubs collapsed → events returns to default top
-    eventsSidebar.style.top = "128px";
-  } else {
-    // clubs open → place events directly below clubs
-    const offset = 70 + clubsContent.offsetHeight + 12; 
-    eventsSidebar.style.top = offset + "px";
-  }
-}
-
-/* ---------------- CLUBS TOGGLE ---------------- */
-clubsToggle.onclick = () => {
-  clubsContent.hidden = !clubsContent.hidden;
-
-  repositionEventsSidebar();  // keep events panel tucked under clubs
-  updateCalendarVisibility();
-
-  // Mode always stays "clubs" unless user explicitly opens events
-  if (mode !== "events") {
-    mode = "clubs";
-    showAllClubs();
-  }
-};
-
-/* ---------------- EVENTS TOGGLE ---------------- */
-eventsToggle.onclick = () => {
-  eventsContent.hidden = !eventsContent.hidden;
-
-  updateCalendarVisibility();
-  repositionEventsSidebar();
-
-  if (!eventsContent.hidden) {
-    // Switching INTO events mode
-    mode = "events";
-
-    // Jump to first upcoming event if no date selected
-    if (!calendarDate.value) autoJumpToFirstEvent();
-
-    if (calendarDate.value)
-      updateEventsByDate(parseDateIso(calendarDate.value));
-  } else {
-    // Switching OUT of events mode
-    mode = "clubs";
-    showAllClubs();
-  }
-};
-    
-/* event type filter buttons */
-function setType(t){
-  eventType = t;
-  gamesBtn.classList.toggle("active", t === "games");
-  practicesBtn.classList.toggle("active", t === "practices");
-  allBtn.classList.toggle("active", t === "all");
-  // re-render calendar highlights and jump to next event for this filter if events are open
-  renderCalendarFor(calendarDateObj);
-  if (mode === "events") {
-    const nextIso = findNextEventDate(eventType);
-    if (nextIso) {
-      const dt = parseDateIso(nextIso);
-      calendarDateObj = new Date(dt.getFullYear(), dt.getMonth(), 1);
-      renderCalendarFor(calendarDateObj);
-      setTimeout(() => {
-        const nodes = Array.from(document.querySelectorAll("#calendarGrid .calendar-day"));
-        for (const node of nodes) {
-          if (node.classList.contains("disabled")) continue;
-          if (parseInt(node.textContent,10) === dt.getDate()) { node.click(); break; }
-        }
-      }, 20);
-    } else {
-      // clear markers
-      markers.forEach(({ marker }) => map.removeLayer(marker));
-      window._tempEventMarkers.forEach(m => map.removeLayer(m));
-      window._tempEventMarkers = [];
-    }
-  }
-}
-gamesBtn.onclick = () => setType("games");
-practicesBtn.onclick = () => setType("practices");
-allBtn.onclick = () => setType("all");
-
-/* map click clears locked popup */
-map.on("click", (e) => {
-  if (lastClickedMarker) {
-    try { lastClickedMarker.closePopup(); } catch(e){}
-    lastClickedMarker = null;
-  }
-});
-
-/* map zoom - rescale icons and reapply behaviors */
-map.on("zoomend", () => {
-  refreshIcons();
-});
-
-/* periodic full refresh */
-let refreshTimer = null;
-async function fullRefresh(){
-  try {
-    await loadClubs();
-    await loadEvents();
-    startTicker();
-    // re-show appropriate mode
-    if (mode === "events") {
-      const nextIso = findNextEventDate(eventType) || toIsoDate(new Date());
-      const dt = parseDateIso(nextIso);
-      calendarDateObj = new Date(dt.getFullYear(), dt.getMonth(), 1);
-      renderCalendarFor(calendarDateObj);
-      // click the day programmatically
-      setTimeout(() => {
-        const nodes = Array.from(document.querySelectorAll("#calendarGrid .calendar-day"));
-        for (const node of nodes) {
-          if (node.classList.contains("disabled")) continue;
-          if (parseInt(node.textContent,10) === dt.getDate()) { node.click(); break; }
-        }
-      }, 20);
-    } else {
-      showAllClubs();
-    }
-  } catch (err) {
-    console.error("refresh error", err);
-  }
-}
-refreshTimer = setInterval(fullRefresh, REFRESH_MS);
-
-/* initial boot */
-(async function init(){
-  try {
-    await loadClubs();
-    await loadEvents();
-    startTicker();
-    // calendar initial month
-    calendarDateObj = new Date();
-    renderCalendarFor(calendarDateObj);
-    // default club view
-    showAllClubs();
-    toggleCalendarPanel();
-  } catch (err) {
-    console.error("init error", err);
-  }
-})();
-</script>
 </body>
 </html>
