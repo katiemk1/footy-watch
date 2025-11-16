@@ -1,3 +1,4 @@
+// main.js
 import { initCalendar, prevMonth, nextMonth, jumpToNextEvent, setClubsAndEvents } from './calendar.js';
 
 // DOM
@@ -24,10 +25,10 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors"
 }).addTo(map);
 
-// Calendar initialization
+// Calendar
 initCalendar(calendarGrid, calMonthLabel, updateEventsByDate);
 
-// Fetch CSV
+// CSV fetch helper
 async function fetchCsv(url) {
   const r = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
   if (!r.ok) throw new Error("Fetch failed: " + r.status);
@@ -52,12 +53,14 @@ async function loadClubs() {
       const club = {
         name: row.Name || row.Club,
         lat, lon,
-        logo: row.Logo || "https://aussierulesusa.com/wp-content/uploads/2024/05/placeholder.png",
+        logo: row.Logo || "https://upload.wikimedia.org/wikipedia/en/e/ec/USAFL_logo.png",
         instagram: row.InstagramHandle || "",
         games: [], practices: []
       };
       clubs.push(club);
+
       const marker = L.marker([lat, lon]).addTo(map);
+      marker.bindPopup(`<strong>${club.name}</strong>`);
       markers.push({ club, marker });
 
       const li = document.createElement("div");
@@ -81,7 +84,10 @@ async function loadClubs() {
 async function loadEvents() {
   try {
     const data = await fetchCsv("YOUR_EVENTS_SHEET_CSV_URL_HERE");
-    events = data;
+    events = data.map(ev => ({
+      ...ev,
+      Date: normalizeDate(ev.Date)
+    }));
     setClubsAndEvents(clubs, events);
   } catch(e) {
     console.error(e);
@@ -98,7 +104,6 @@ clubsToggle.onclick = () => {
   clubsContent.hidden = !clubsContent.hidden;
   if (clubsContent.hidden) mode = "events";
 };
-
 eventsToggle.onclick = () => {
   const opening = eventsContent.hidden;
   if (opening) clubsContent.hidden = true;
@@ -111,23 +116,28 @@ document.getElementById("gamesBtn").onclick = () => { eventType="games"; };
 document.getElementById("practicesBtn").onclick = () => { eventType="practices"; };
 document.getElementById("allBtn").onclick = () => { eventType="all"; };
 
-// Update events for a selected date
+// Update events for selected date
 function updateEventsByDate(date) {
-  // Clear previous markers
-  markers.forEach(m => map.removeLayer(m.marker));
   tempEventMarkers.forEach(m => map.removeLayer(m));
   tempEventMarkers = [];
 
   const iso = date.toISOString().slice(0,10);
   clubs.forEach(c => {
     let show = false;
-    (c.games||[]).forEach(ev => { if (ev.date === iso) show = true; });
-    (c.practices||[]).forEach(ev => { if (ev.date === iso) show = true; });
+    (c.games||[]).forEach(ev => { if (normalizeDate(ev.date) === iso) show = true; });
+    (c.practices||[]).forEach(ev => { if (normalizeDate(ev.date) === iso) show = true; });
     if (show) {
       const marker = L.marker([c.lat, c.lon]).addTo(map);
       tempEventMarkers.push(marker);
     }
   });
+}
+
+function normalizeDate(input) {
+  if (!input) return null;
+  const d = new Date(input);
+  if (isNaN(d)) return input; 
+  return d.toISOString().slice(0,10);
 }
 
 // Initialize everything

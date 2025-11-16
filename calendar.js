@@ -1,5 +1,5 @@
 // calendar.js
-export let calCurrentMonth = new Date();  // tracks which month is shown
+export let calCurrentMonth = new Date();  
 
 let calendarGrid, calMonthLabel;
 let clubs = [], events = [], updateEventsByDateFn;
@@ -13,7 +13,7 @@ export function initCalendar(gridEl, monthLabelEl, updateEventsByDateCallback) {
 
 export function setClubsAndEvents(clubsData, eventsData) {
   clubs = clubsData;
-  events = eventsData;
+  events = eventsData.map(ev => ({ ...ev, Date: normalizeDate(ev.Date) }));
 }
 
 export function renderCalendar() {
@@ -79,15 +79,20 @@ function getAllEventDates() {
   const dates = new Set();
 
   clubs.forEach(club => {
-    (club.games || []).forEach(ev => dates.add(ev.date));
-    (club.practices || []).forEach(ev => dates.add(ev.date));
+    (club.games || []).forEach(ev => dates.add(normalizeDate(ev.date)));
+    (club.practices || []).forEach(ev => dates.add(normalizeDate(ev.date)));
   });
 
   events.forEach(ev => {
-    if ((ev.Club || "").trim().toLowerCase() === "usafl") {
-      if (ev.Date) dates.add(ev.Date);
-    }
+    if (ev.Date) dates.add(normalizeDate(ev.Date));
   });
 
   return Array.from(dates);
+}
+
+function normalizeDate(input) {
+  if (!input) return null;
+  const d = new Date(input);
+  if (isNaN(d)) return input; 
+  return d.toISOString().slice(0,10);
 }
