@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Women's Aussie Football Finder</title>
+<title>Sports Watch — USAFL Women's Footy Map</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -24,13 +24,13 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
 }
 .ticker-card {
   margin:8px auto;
-  background: rgba(11,102,178,0.75);
+  background: rgba(11,102,178,0.50); /* more transparent */
   color: white;
-  padding: 10px 16px;
+  padding: 15px 16px;
   width:100%;
-  max-width:1200px;
+  max-width:1600px;
   display:flex; align-items:center; justify-content:center;
-  gap:12px;
+  gap:16px;
   pointer-events:auto;
   box-shadow:0 6px 20px rgba(0,0,0,0.2);
   font-weight:700;
@@ -38,7 +38,7 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
 }
 
 /* Move zoom buttons below ticker */
-.leaflet-top.leaflet-left { top:70px !important; }
+.leaflet-top.leaflet-left { top:70px !important; } /* push zoom down so not under ticker */
 
 /* Sidebars */
 .sidebar {
@@ -65,20 +65,15 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
 .legend-item{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
 .legend-dot{ width:12px;height:12px;border-radius:50%;display:inline-block; }
 
-/* calendar (custom) */
+/* calendar (bottom-right) */
 #calendarContainer{
-  position:absolute; bottom:12px; right:12px; z-index:1500; background:var(--card-bg); border-radius:10px; padding:10px; box-shadow:0 6px 18px rgba(0,0,0,0.18);
-  display:none; width:290px;
+  position:absolute; bottom:12px; right:12px; z-index:1500; background:var(--card-bg); border-radius:10px; padding:8px 12px; box-shadow:0 6px 18px rgba(0,0,0,0.18);
+  display:none;
 }
-#calendarHeader{ display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:8px;}
-#calendarHeader .controls { margin:0; }
-#calendarGrid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
-.calendar-day { padding:6px 6px; text-align:center; border-radius:6px; cursor:pointer; font-size:13px; }
-.calendar-day.disabled { color:#bbb; cursor:default; background:transparent; }
-.calendar-day.hasEvent { font-weight:700; background: linear-gradient(180deg, rgba(11,102,178,0.06), rgba(11,102,178,0.03)); border:1px solid rgba(11,102,178,0.12); }
-.calendar-day.selected { background: var(--ui-accent); color:white; box-shadow: 0 6px 12px rgba(11,102,178,0.18); }
+#calendarContainer label{ font-weight:700; margin-right:6px; }
+#calendarContainer input[type=date]{ padding:6px 8px; border-radius:6px; border:1px solid #ccc; }
 
-/* popup card (compact for hover & click) */
+/* popup card (compact for hover) */
 .popup-card{
   text-align:center;
   width:170px;
@@ -94,7 +89,7 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
 /* responsive */
 @media(max-width:900px){
   .sidebar{ right:8px; width:260px; }
-  #calendarContainer{ right:8px; bottom:8px; width:260px; }
+  #calendarContainer{ right:8px; bottom:8px; }
   .ticker-card { max-width: calc(100% - 24px); margin:8px; }
 }
 </style>
@@ -103,7 +98,7 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
 
 <div id="map"></div>
 
-<!-- ticker -->
+<!-- ticker (full-width centered inner card) -->
 <div id="ticker"><div class="ticker-card"><div id="tickerText">Loading upcoming events…</div></div></div>
 
 <!-- Clubs sidebar -->
@@ -133,22 +128,9 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe U
 </div>
 
 <!-- calendar -->
-<div id="calendarContainer" aria-hidden="true">
-  <div id="calendarHeader">
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button id="prevMonth" class="btn" title="Previous month">&lt;</button>
-      <div id="calendarMonth" style="font-weight:700;"></div>
-      <button id="nextMonth" class="btn" title="Next month">&gt;</button>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button id="nextEventBtn" class="btn" title="Jump to next event">Next</button>
-      <button id="todayBtn" class="btn" title="Jump to today">Today</button>
-    </div>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;font-weight:700;color:var(--muted);font-size:12px;">
-    <div style="text-align:center">Sun</div><div style="text-align:center">Mon</div><div style="text-align:center">Tue</div><div style="text-align:center">Wed</div><div style="text-align:center">Thu</div><div style="text-align:center">Fri</div><div style="text-align:center">Sat</div>
-  </div>
-  <div id="calendarGrid"></div>
+<div id="calendarContainer">
+  <label for="calendarDate">Date:</label>
+  <input type="date" id="calendarDate" min="2026-04-01" max="2026-11-30" />
 </div>
 
 <!-- libs -->
@@ -163,14 +145,14 @@ const PROXY = "https://api.allorigins.win/raw?url=";
 const REFRESH_MS = 5 * 60 * 1000; // 5 minutes
 
 /* app state */
-const start = new Date("2026-01-01");
+const start = new Date("2026-04-01");
 const end = new Date("2026-11-30");
 const gameColors = {"club-metro":"#66ccff","club-tournament":"#0077cc","league-tournament":"#003366"};
 const practiceColor = "#32cd32";
 const usaflLogo = "https://aussierulesusa.com/wp-content/uploads/2024/05/USAFL_logo.png";
 
-let clubs = [];      // {name, lat, lon, logo, instagram, games[], practices[]}
-let events = [];     // raw events rows
+let clubs = [];      // {name, lat, lon, logo, instagram, instagramLink, games[], practices[]}
+let events = [];     // raw events
 let markers = [];    // {club, marker}
 let lastClickedMarker = null;
 let mode = "clubs";
@@ -188,25 +170,71 @@ const allBtn = document.getElementById("allBtn");
 const tickerText = document.getElementById("tickerText");
 const clubsCount = document.getElementById("clubsCount");
 const calendarContainer = document.getElementById("calendarContainer");
-const calendarGrid = document.getElementById("calendarGrid");
-const calendarMonth = document.getElementById("calendarMonth");
-const prevMonthBtn = document.getElementById("prevMonth");
-const nextMonthBtn = document.getElementById("nextMonth");
-const nextEventBtn = document.getElementById("nextEventBtn");
-const todayBtn = document.getElementById("todayBtn");
+const calendarDate = document.getElementById("calendarDate");
 
-/* map centered slightly east per request */
+const DEFAULT_CLUBS = [
+{ name:"Arizona Lady Hawks", lat:33.4484, lon:-112.074, instagram:"@azhawks", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/AZHawks-1-768x681.png"},
+{ name:"Atlanta Kookaburas", lat:33.749, lon:-84.388, instagram:"@atlkookaburras", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/AtlantaKookaburras2012-1-768x606.png"},
+{ name:"Austin Crows", lat:30.2672, lon:-97.7431, instagram:"@austincrows", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Austin-Crows-shield-logo-1-768x538.png"},
+{ name:"Baton Rouge Tigers", lat:30.4515, lon:-91.1871, instagram:"@brfooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/BRT_Tiger20Head-2-e1721771864128.png"},
+{ name:"Bayou Brawlers", lat:29.9511, lon:-90.0715, instagram:"@bayou.brawlers.arfc", logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/Bayou20Brawlers2028229.png"},
+{ name:"Boston Demons", lat:42.36, lon:-71.06, instagram:"@boston_demons", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Boston_logo-1-768x841.png"},
+{ name:"Chicago Swans", lat:41.8781, lon:-87.6298, instagram:"@chicagofooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/cafa_logo_300x400-1-3.png"},
+{ name:"Cincinnati Dockers", lat:39.1031, lon:-84.512, instagram:"@cincinattidockers", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Cincinnati-Dockers-400w-2.png"},
+{ name:"Columbus Cats", lat:39.9612, lon:-82.9988, instagram:"@columbusfooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/ColumbusCats-3.png"},
+{ name:"DC Eagles", lat:38.88639255, lon:-77.04867424, instagram:"@dceaglesfc", logo:"https://aussierulesusa.com/wp-content/uploads/2025/02/dc-eagles.png"},
+{ name:"Denver Bulldogs", lat:39.7392, lon:-104.9903, instagram:"@denverbulldogsfooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Denver-768x666.png"},
+{ name:"Golden Gate", lat:37.7749, lon:-122.4194, instagram:"@ggafl", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/GGAFL_gradient-768x781.png"},
+{ name:"Hawai'i Eagles", lat:21.3069, lon:-157.8583, instagram:"@hawaiieagles", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/HawaiiLogoNew2-1.png"},
+{ name:"Houston Lonestars", lat:29.7604, lon:-95.3698, instagram:"@houston_lonestars", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/HoustonSq2.png"},
+{ name:"Minnesota Freeze", lat:44.9778, lon:-93.3, instagram:"@mnfreezefooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Freeze-logo-400w.png"},
+{ name:"New York Magpies", lat:40.7128, lon:-74.006, instagram:"@newyorkmagpies", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/NYMagpiesBW.png"},
+{ name:"North Star Blue Ox", lat:44.95, lon:-93.09, instagram:"@northstarblueoxfootyclub", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/BlueOxLogoCropped.png"},
+{ name:"North Texas Devils", lat:33.0198, lon:-96.6989, instagram:"@ntxdevilswomen", logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/NTX-Devils-Logo-full-RGB.jpg"},
+{ name:"Orange County Giants", lat:33.6846, lon:-117.8265, instagram:"@ocgiants", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/OCSquare.png"},
+{ name:"Philadelphia Hawks", lat:39.9526, lon:-75.1652, instagram:"@phillyhawks", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/PhillyHawks-2013.png"},
+{ name:"Portland Sockeyes", lat:45.5152, lon:-122.6784, instagram:"@portland_afc", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/pafc.club_.transparent-768x768.png"},
+{ name:"Sacramento Suns", lat:38.5816, lon:-121.4944, instagram:"@sacfooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/SacramentoSuns_0.png"},
+{ name:"Saint Louis Australian Football Club", lat:38.627, lon:-90.1994, instagram:"@stlaustralianfootball", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/STL20Logo202022-1-768x768.jpeg"},
+{ name:"Seattle Grizzlies", lat:47.6062, lon:-122.3321, instagram:"@seattlegrizzlies", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/seattle_grizzlies-1-768x792.png"},
+{ name:"Virginia Lions", lat:37.5407, lon:-77.436, instagram:"@vafooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/virginia_lions_square_0-1-768x994.png"},
+{ name:"Wasatch WarGulls", lat:40.7608, lon:-111.891, instagram:"@wasatchwargulls", logo:"https://aussierulesusa.com/wp-content/uploads/2025/03/image0.png"}
+];
+
+/* map centered a bit east as requested */
 const map = L.map("map").setView([39.5, -85], 4);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors" }).addTo(map);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "&copy; OpenStreetMap contributors",
+  referrerPolicy: "strict-origin-when-cross-origin"
+}).addTo(map);
 
 /* utilities */
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 function iconSizeForZoom(z){ return clamp(Math.round(30 + (z - 3) * 8), 28, 96); }
-function parseDateIso(s){ if(!s) return new Date(NaN); return new Date(s + "T00:00:00"); }
-function formatDate(d){ return d.toLocaleString("default", { month: "short", day: "numeric" }); }
-function toIsoDate(d){ return d.toISOString().slice(0,10); }
 
-/* icon generator */
+function loadDefaultClubs(){
+  clubs = DEFAULT_CLUBS.map(c => ({
+    ...c,
+    games: [],
+    practices: []
+  }));
+
+  markers.forEach(m => map.removeLayer(m.marker));
+  markers = [];
+
+  clubs.forEach(club=>{
+    const icon = makeLogoIcon(club.logo,null,1);
+    const marker = L.marker([club.lat,club.lon],{icon}).addTo(map);
+
+    marker.bindPopup(clubPopupHTML(club),{closeButton:false});
+
+    markers.push({club,marker});
+  });
+
+  showAllClubs();
+}
+    
+/* create div icon, optionally border, and opacity */
 function makeLogoIcon(logoUrl, borderColor=null, opacity=1){
   const z = map.getZoom();
   const size = iconSizeForZoom(z);
@@ -219,39 +247,27 @@ function makeLogoIcon(logoUrl, borderColor=null, opacity=1){
   return L.divIcon({ html, className: "", iconSize: [size, size], iconAnchor: [size/2, size], popupAnchor: [0, -(size + 8)] });
 }
 
-/* popup HTML */
-function clubPopupHTML(club, selectedDateIso){
-  const insta = club.instagram ? `<div style="margin-top:4px"><a href="https://instagram.com/${club.instagram.replace(/^@/,"")}" target="_blank" rel="noopener noreferrer">${club.instagram}</a></div>` : "";
-  const next = nextEventText(club, parseDateIso(selectedDateIso || toIsoDate(new Date())));
-  return `<div class="popup-card">
-    <img src="${club.logo}" alt="${club.name}">
-    <div style="font-weight:700">${club.name}</div>
-    ${insta}
-    <div class="small-muted">${next}</div>
-  </div>`;
-}
+function parseDateIso(s){ return new Date(s + "T00:00:00"); }
+function formatDate(d){ return d.toLocaleString("default", { month: "short", day: "numeric" }); }
 
-/* nextEvent text with Subtitle preference, and 'Tournament' mapping for club-tournament */
+/* next-event text: if event has Subtitle use it (per request). */
 function nextEventText(club, date){
   const future = [];
-  (club.games || []).forEach(ev => {
-    const d = parseDateIso(ev.date);
-    if (d >= date) {
-      // label prefer Subtitle if exists; if category is club-tournament label 'Tournament'
-      let label = ev.subtitle || (ev.category === "club-tournament" ? "Tournament" : "Game");
-      future.push({ date: d, label });
-    }
+  (club.games || []).forEach(g => {
+    const gDate = parseDateIso(g.date);
+    if (gDate >= date) future.push({ date: gDate, type: g.type, label: g.subtitle || "Game", title: g.title || "" });
   });
-  (club.practices || []).forEach(ev => {
-    const d = parseDateIso(ev.date || ev);
-    if (d >= date) future.push({ date: d, label: ev.subtitle || "Practice" });
+  (club.practices || []).forEach(p => {
+    const pDate = parseDateIso(p.date || p);
+    if (pDate >= date) future.push({ date: pDate, type: "practice", label: p.subtitle || "Practice", title: p.title || "" });
   });
   if (!future.length) return "No upcoming events";
   future.sort((a,b) => a.date - b.date);
-  return `${future[0].label}: ${formatDate(future[0].date)}`;
+  const e = future[0];
+  return `${e.label}: ${formatDate(e.date)}`;
 }
 
-/* CSV helper */
+/* csv fetcher using proxy */
 async function fetchCsv(url){
   const r = await fetch(PROXY + encodeURIComponent(url));
   if (!r.ok) throw new Error("Fetch failed: " + r.status);
@@ -259,40 +275,61 @@ async function fetchCsv(url){
   return Papa.parse(text, { header: true, skipEmptyLines: true }).data;
 }
 
-/* LOAD CLUBS */
+/* load clubs sheet */
 async function loadClubs(){
   clubListEl.textContent = "Loading clubs...";
   try {
     const data = await fetchCsv(CLUB_SHEET_URL);
     clubs = [];
+    // remove existing markers from map
     markers.forEach(m => map.removeLayer(m.marker));
     markers = [];
     clubListEl.innerHTML = "";
-
     for (const row of data){
       const rawName = (row.Name || row.Club || "").trim();
       if (!rawName) continue;
-      if (rawName.toLowerCase() === "usafl") continue; // exclude USAFL from club list
+      // skip USAFL as a club listing
+      if (rawName.toLowerCase() === "usafl") continue;
       const lat = parseFloat(row.Latitude);
       const lon = parseFloat(row.Longitude);
       if (Number.isNaN(lat) || Number.isNaN(lon)) continue;
       let logo = (row.Logo || row["Logo URL"] || row.Image || row.LogoUrl || "").trim();
       if (!logo.startsWith("http")) logo = "https://aussierulesusa.com/wp-content/uploads/2024/05/placeholder.png";
-      const insta = (row.InstagramHandle || "").trim();
-
-      const club = { name: rawName, lat, lon, logo, instagram: insta, games: [], practices: [] };
+      const instaRaw = (row.InstagramHandle || "").trim();
+      const club = {
+        name: rawName,
+        lat, lon,
+        logo,
+        instagram: instaRaw, // keep handle for display, not "Instagram" text
+        games: [],
+        practices: []
+      };
       clubs.push(club);
 
+      // create marker
       const icon = makeLogoIcon(club.logo, null, 1);
-      const marker = L.marker([club.lat, club.lon], { icon }).addTo(map);
+      const marker = L.marker([club.lat, club.lon], { icon });
+      marker.addTo(map);
+
+      // popup content (compact)
       marker.bindPopup(clubPopupHTML(club), { closeButton: false });
 
-      marker.on("mouseover", () => { if (lastClickedMarker !== marker) marker.openPopup(); });
-      marker.on("mouseout", () => { if (lastClickedMarker !== marker) marker.closePopup(); });
+      // hover shows popup (unless clicked/locked)
+      marker.on("mouseover", () => {
+        if (lastClickedMarker !== marker) marker.openPopup();
+      });
+      marker.on("mouseout", () => {
+        if (lastClickedMarker !== marker) marker.closePopup();
+      });
+
+      // click locks popup until another click elsewhere
       marker.on("click", () => {
-        if (lastClickedMarker && lastClickedMarker !== marker) lastClickedMarker.closePopup();
+        if (lastClickedMarker && lastClickedMarker !== marker) {
+          lastClickedMarker.closePopup();
+        }
         lastClickedMarker = marker;
         marker.openPopup();
+        // if clicked while clubs panel visible, keep it; fly to location
         map.flyTo([club.lat, club.lon], 6);
       });
 
@@ -303,6 +340,7 @@ async function loadClubs(){
       el.className = "club-item";
       el.innerHTML = `<img src="${club.logo}" alt="${club.name}"><div style="flex:1">${club.name}</div>`;
       el.onclick = () => {
+        // mimic clicking marker
         if (lastClickedMarker && lastClickedMarker !== marker) lastClickedMarker.closePopup();
         lastClickedMarker = marker;
         marker.openPopup();
@@ -310,7 +348,6 @@ async function loadClubs(){
       };
       clubListEl.appendChild(el);
     }
-
     clubsCount.textContent = `${clubs.length}`;
     if (!clubs.length) clubListEl.textContent = "No clubs found in sheet.";
   } catch (err) {
@@ -319,32 +356,71 @@ async function loadClubs(){
   }
 }
 
-/* LOAD EVENTS (and attach to clubs) - events override coords if provided */
+/* club popup html - uses Instagram handle text, not the word "Instagram" */
+function clubPopupHTML(club){
+  const insta = club.instagram ? `<div style="margin-top:4px"><a href="https://instagram.com/${club.instagram.replace(/^@/,"")}" target="_blank" rel="noopener noreferrer">${club.instagram}</a></div>` : "";
+  const next = nextEventText(club, parseDateIso(calendarDate.value || start.toISOString().slice(0,10)));
+  return `<div class="popup-card">
+    <img src="${club.logo}" alt="${club.name}">
+    <div style="font-weight:700">${club.name}</div>
+    ${insta}
+    <div class="small-muted">${next}</div>
+  </div>`;
+}
+
+/* load events sheet and merge with clubs — events override coords when Latitude/Longitude present */
 async function loadEvents(){
   try {
     events = await fetchCsv(EVENTS_SHEET_URL);
-    // clear clubs' events
+
+    // reset club events
     clubs.forEach(c => { c.games = []; c.practices = []; });
 
     for (const ev of events){
       const clubName = (ev.Club || "").trim();
       if (!clubName) continue;
       const type = (ev.EventType || "").toLowerCase();
-      const category = (ev.EventCategory || "club-metro").toLowerCase();
-      const subtitle = (ev.Subtitle || "").trim();
-      const title = (ev.Title || "").trim();
+      // parse event coordinates (override) - use same header names as you confirmed
       const evLat = ev.Latitude ? parseFloat(ev.Latitude) : null;
       const evLon = ev.Longitude ? parseFloat(ev.Longitude) : null;
+      const subtitle = (ev.Subtitle || "").trim();
+      const title = (ev.Title || "").trim();
+
+      // If event is from USAFL, treat specially: use USAFL logo, subtitle replaces name.
+      if (clubName.toLowerCase() === "usafl") {
+        // create a synthetic event club entry so league events will appear even if USAFL isn't a club
+        // push into a special "USAFL events" bucket by attaching to a pseudo-club object later when rendering event markers
+        // we'll store them in a separate array below
+        // but also allow replacement of title/subtitle logic
+      }
+
+      // find club (case-sensitive match by name)
+      const club = clubs.find(c => c.name === clubName);
+      // If club not found, skip unless it's USAFL (we still want USAFL events)
+      if (!club && clubName.toLowerCase() !== "usafl") continue;
+
       const eventObj = {
-        clubName, date: (ev.Date || "").trim(), type, category, subtitle: subtitle || null, title: title || "", lat: (evLat && evLon) ? evLat : null, lon: (evLat && evLon) ? evLon : null
+        clubName,
+        date: (ev.Date || "").trim(),    // expected ISO 'YYYY-MM-DD'
+        type,
+        category: (ev.EventCategory || "club-metro").toLowerCase(),
+        subtitle: subtitle || null,
+        title: title || "",
+        lat: (evLat && evLon) ? evLat : null,
+        lon: (evLat && evLon) ? evLon : null
       };
 
-      const club = clubs.find(c => c.name === clubName);
+      // if club exists, attach
       if (club) {
-        if (type === "game") club.games.push(eventObj);
-        else if (type === "practice") club.practices.push(eventObj);
+        if (type === "game") {
+          club.games.push(eventObj);
+        } else if (type === "practice") {
+          club.practices.push(eventObj);
+        }
       } else {
-        // keep in events array (already), used for USAFL special rendering
+        // USAFL or external events for which we might still want markers
+        // push into a global events array to render separately
+        // we'll keep them in events[] (already) and handle USAFL rendering in updateEventsByDate
       }
     }
   } catch (err) {
@@ -352,22 +428,28 @@ async function loadEvents(){
   }
 }
 
-/* BUILD TICKER (next 5 months) */
+/* Build a list of upcoming items (next 5 months) for ticker */
 function buildTickerItems(){
   const items = [];
   const today = new Date();
-  const cutoff = new Date(today.getTime() + (5 * 30 * 24 * 60 * 60 * 1000));
+  const cutoff = new Date(today.getTime() + (5 * 30 * 24 * 60 * 60 * 1000)); // approx 5 months
+  // club events
   clubs.forEach(c => {
     (c.games || []).forEach(g => {
       const d = parseDateIso(g.date);
-      if (d >= today && d <= cutoff) items.push(`${formatDate(d)} — ${c.name} — ${g.subtitle || (g.category === "club-tournament" ? "Tournament" : "Game")}`);
+      if (d >= today && d <= cutoff) {
+        const label = `${formatDate(d)} — ${c.name} — ${g.subtitle || g.category || "Game"}`;
+        items.push(label);
+      }
     });
     (c.practices || []).forEach(p => {
       const d = parseDateIso(p.date || p);
-      if (d >= today && d <= cutoff) items.push(`${formatDate(d)} — ${c.name} — ${p.subtitle || "Practice"}`);
+      if (d >= today && d <= cutoff) {
+        items.push(`${formatDate(d)} — ${c.name} — ${p.subtitle || "Practice"}`);
+      }
     });
   });
-  // USAFL events
+  // USAFL events from events[] (clubName === "USAFL")
   events.forEach(ev => {
     if ((ev.Club || "").trim().toLowerCase() === "usafl") {
       const d = parseDateIso(ev.Date || "");
@@ -377,12 +459,15 @@ function buildTickerItems(){
       }
     }
   });
+  // sort by date (parse from start of string)
   items.sort((a,b) => new Date(a.split(" — ")[0]) - new Date(b.split(" — ")[0]));
   return items.length ? items : ["No upcoming events in the next 5 months"];
 }
 
-/* TICKER rotation every 5 seconds */
-let tickerItems = [], tickerIndex = 0, tickerTimer = null;
+/* ticker rotation */
+let tickerItems = [];
+let tickerIndex = 0;
+let tickerTimer = null;
 function startTicker(){
   tickerItems = buildTickerItems();
   tickerIndex = 0;
@@ -391,358 +476,212 @@ function startTicker(){
   tickerTimer = setInterval(() => {
     tickerIndex = (tickerIndex + 1) % tickerItems.length;
     tickerText.textContent = tickerItems[tickerIndex];
-  }, 5000);
+  }, 3500);
 }
 
-/* Overlap fade logic - make icons slightly transparent if another icon is close */
+/* detect nearby markers and set small fade on those with neighbors */
 function applyOverlapFades(){
-  const threshold = 30000; // meters
+  // compute for each marker whether there is another marker within threshold (map meters)
+  const thresholdMeters = 35000; // 35km - adjust if needed
   for (const { club, marker } of markers){
     let close = false;
     for (const { club: other } of markers){
       if (other === club) continue;
       const d = map.distance([club.lat, club.lon], [other.lat, other.lon]);
-      if (d < threshold) { close = true; break; }
+      if (d < thresholdMeters) { close = true; break; }
     }
+    // set opacity class by toggling DivIcon HTML opacity: easiest approach is to recreate icon with lower opacity
     const opacity = close ? 0.75 : 1;
-    marker.setIcon(makeLogoIcon(club.logo, null, opacity));
+    const borderColor = null;
+    marker.setIcon(makeLogoIcon(club.logo, borderColor, opacity));
   }
 }
 
-/* refresh icons on zoom change (rescale) */
+/* refresh icons on zoom to scale nicely */
 function refreshIcons(){
   markers.forEach(({ club, marker }) => {
-    // cannot read previous opacity reliably from icon markup, so re-run overlap fades afterwards
-    marker.setIcon(makeLogoIcon(club.logo, null, 1));
+    // preserve current opacity by reading attribute of existing icon HTML if possible
+    marker.setIcon(makeLogoIcon(club.logo, null, marker.options && marker.options.opacity ? marker.options.opacity : 1));
   });
-  applyOverlapFades();
 }
 
-/* show all clubs (clubs-mode) */
-function showAllClubs(selectedDateIso){
-  // remove all from map
+/* show all clubs (clubs mode) */
+function showAllClubs(){
+  // remove any markers then add
   markers.forEach(({ marker }) => map.removeLayer(marker));
   markers.forEach(({ club, marker }) => {
     marker.setIcon(makeLogoIcon(club.logo, null, 1));
-    marker.setLatLng([club.lat, club.lon]); // ensure original coords
     marker.addTo(map);
-    marker.bindPopup(clubPopupHTML(club, selectedDateIso), { closeButton: false });
+    marker.bindPopup(clubPopupHTML(club), { closeButton: false });
   });
   applyOverlapFades();
 }
 
-/* temporary storage for USAFL markers placed for a given date */
-if (!window._tempEventMarkers) window._tempEventMarkers = [];
-
-/* update events markers for a selected date (events-mode), uses event override coords if provided */
+/* update events markers for a selected date (events mode) */
 function updateEventsByDate(selectedDate){
-  // clear every club marker (we'll add back only those that match)
+  // clear all markers from map
   markers.forEach(({ marker }) => map.removeLayer(marker));
-  // remove previously created temp markers
-  window._tempEventMarkers.forEach(m => map.removeLayer(m));
-  window._tempEventMarkers = [];
+  const selectedIso = selectedDate.toISOString().slice(0,10);
 
-  const selectedIso = toIsoDate(selectedDate);
-
+  // show club markers only where club has event on that date and matches eventType filter
   markers.forEach(({ club, marker }) => {
-    let show = false, color = null, useLat = club.lat, useLon = club.lon;
+    let show = false;
+    let color = null;
+    let useLat = club.lat, useLon = club.lon;
+    // check games (club.games may contain event objects)
     (club.games || []).forEach(ev => {
       if ((eventType === "all" || eventType === "games") && ev.date === selectedIso) {
-        show = true; color = gameColors[ev.category] || gameColors["club-metro"];
+        show = true;
+        color = gameColors[ev.category] || gameColors["club-metro"];
         if (ev.lat !== null && ev.lon !== null) { useLat = ev.lat; useLon = ev.lon; }
       }
     });
     (club.practices || []).forEach(ev => {
-      if ((eventType === "all" || eventType === "practices") && (ev.date === selectedIso || (ev.date === undefined && ev === selectedIso))) {
-        show = true; color = practiceColor;
+      if ((eventType === "all" || eventType === "practices") && ev.date === selectedIso) {
+        show = true;
+        color = practiceColor;
         if (ev.lat !== null && ev.lon !== null) { useLat = ev.lat; useLon = ev.lon; }
       }
     });
-    if (show) {
+    if (show){
+      // reposition marker if event has override lat/lon
       marker.setLatLng([useLat, useLon]);
+      // use border color to indicate event type and keep fully opaque
       marker.setIcon(makeLogoIcon(club.logo, color, 1));
       marker.addTo(map);
-      marker.bindPopup(clubPopupHTML(club, selectedIso), { closeButton: false });
+      marker.bindPopup(clubPopupHTML(club), { closeButton: false });
     }
   });
 
-  // USAFL events (from events rows) for that date
+  // Additionally render USAFL events (events rows where Club == USAFL)
+  // We'll create temporary markers for USAFL events on that date and remove them again when switching modes.
+  // Approach: create markersOnDate array and remove them when next call happens.
+  if (!window._tempEventMarkers) window._tempEventMarkers = [];
+  // remove old temps
+  window._tempEventMarkers.forEach(m => map.removeLayer(m));
+  window._tempEventMarkers = [];
+
+  // add USAFL events
   events.forEach(ev => {
     if ((ev.Club || "").trim().toLowerCase() !== "usafl") return;
     if ((ev.Date || "").trim() !== selectedIso) return;
+    // event subtitle becomes label/title
+    const label = ev.Subtitle && ev.Subtitle.trim() ? ev.Subtitle.trim() : ev.Title || "USAFL event";
+    // coordinates override?
     const lat = ev.Latitude ? parseFloat(ev.Latitude) : null;
     const lon = ev.Longitude ? parseFloat(ev.Longitude) : null;
-    if (!lat || !lon || isNaN(lat) || isNaN(lon)) return;
-    const label = ev.Subtitle && ev.Subtitle.trim() ? ev.Subtitle.trim() : ev.Title || "USAFL event";
-    const icon = makeLogoIcon(usaflLogo, gameColors[(ev.EventCategory||"league-tournament").toLowerCase()] || gameColors["league-tournament"], 1);
+    // If no coordinates, don't show
+    if (lat === null || lon === null || Number.isNaN(lat) || Number.isNaN(lon)) return;
+    const icon = makeLogoIcon(usaflLogo, gameColors[ev.EventCategory?.toLowerCase()] || gameColors["league-tournament"], 1);
     const m = L.marker([lat, lon], { icon }).addTo(map);
-    m.bindPopup(`<div class="popup-card"><img src="${usaflLogo}"><div style="font-weight:700">${label}</div><div class="small-muted">USAFL event</div></div>`, { closeButton: false });
+    m.bindPopup(`
+      <div class="popup-card">
+        <img src="${usaflLogo}">
+        <div style="font-weight:700">${label}</div>
+        <div class="small-muted">USAFL event</div>
+      </div>
+    `, { closeButton: false });
     window._tempEventMarkers.push(m);
   });
 }
 
-/* Auto-jump calendar to first event (respect filter) */
-function findNextEventDate(forFilter){
+/* helper: find earliest event date and set calendar */
+function autoJumpToFirstEvent(){
   const allDates = [];
-  const today = new Date();
-  // club events
   clubs.forEach(c => {
-    (c.games || []).forEach(g => {
-      if (forFilter === "games" || forFilter === "all") allDates.push({ d: parseDateIso(g.date), kind: "game" });
-    });
-    (c.practices || []).forEach(p => {
-      if (forFilter === "practices" || forFilter === "all") allDates.push({ d: parseDateIso(p.date || p), kind: "practice" });
-    });
-  });
-  // USAFL events from events[]
-  events.forEach(ev => {
-    if ((ev.Club || "").trim().toLowerCase() === "usafl") {
-      if (forFilter === "games" || forFilter === "all" || forFilter === "practices") {
-        allDates.push({ d: parseDateIso(ev.Date), kind: ev.EventType || "game" });
-      }
-    }
-  });
-  const future = allDates.filter(x => x.d && x.d >= today);
-  if (!future.length) return null;
-  future.sort((a,b) => a.d - b.d);
-  return toIsoDate(future[0].d);
-}
-
-/* ----- Custom calendar rendering ----- */
-let calendarDateObj = new Date(); // current displayed month
-function renderCalendarFor(dateObj){
-  calendarGrid.innerHTML = "";
-  const year = dateObj.getFullYear();
-  const month = dateObj.getMonth();
-  calendarMonth.textContent = dateObj.toLocaleString("default", { month: "long", year: "numeric" });
-
-  // first day of month
-  const first = new Date(year, month, 1);
-  const startDay = first.getDay(); // 0..6
-  // days in month
-  const daysInMonth = new Date(year, month+1, 0).getDate();
-
-  // Build a quick set of dates that have events (respecting eventType filter)
-  const hasEventSet = new Set();
-  const isoForDay = d => toIsoDate(d);
-  const today = new Date();
-  const cutoff = new Date(today.getTime() + (5 * 30 * 24 * 60 * 60 * 1000));
-  // include club events
-  clubs.forEach(c => {
-    (c.games || []).forEach(g => {
-      const d = parseDateIso(g.date);
-      if (d >= today && d <= cutoff) {
-        if (eventType === "all" || eventType === "games") hasEventSet.add(isoForDay(d));
-      }
-    });
-    (c.practices || []).forEach(p => {
-      const d = parseDateIso(p.date || p);
-      if (d >= today && d <= cutoff) {
-        if (eventType === "all" || eventType === "practices") hasEventSet.add(isoForDay(d));
-      }
-    });
+    (c.games || []).forEach(g => allDates.push(g.date));
+    (c.practices || []).forEach(p => allDates.push(p.date || p));
   });
   // include USAFL events
-  events.forEach(ev => {
-    if ((ev.Club || "").trim().toLowerCase() === "usafl") {
-      const d = parseDateIso(ev.Date);
-      if (!isNaN(d) && d >= today && d <= cutoff) {
-        if (eventType === "all" || eventType === (ev.EventType||"game")) hasEventSet.add(isoForDay(d));
-      }
-    }
-  });
-
-  // render preceding empty slots
-  for (let i=0;i<startDay;i++){
-    const el = document.createElement("div");
-    el.className = "calendar-day disabled";
-    calendarGrid.appendChild(el);
-  }
-
-  // render days
-  for (let day = 1; day <= daysInMonth; day++){
-    const d = new Date(year, month, day);
-    const iso = isoForDay(d);
-    const el = document.createElement("div");
-    el.className = "calendar-day";
-    el.textContent = day;
-    // disabled if outside range
-    if (d < start || d > end) {
-      el.classList.add("disabled");
-    } else {
-      if (hasEventSet.has(iso)) el.classList.add("hasEvent");
-      el.addEventListener("click", () => {
-        // select day, jump to events on that date
-        // if disabled do nothing
-        if (d < start || d > end) return;
-        // visually mark selected
-        document.querySelectorAll("#calendarGrid .calendar-day").forEach(n => n.classList.remove("selected"));
-        el.classList.add("selected");
-        // show events on this date if events mode
-        if (mode === "events") updateEventsByDate(d);
-      });
-    }
-    calendarGrid.appendChild(el);
-  }
+  events.forEach(ev => { if ((ev.Club || "").trim().toLowerCase() === "usafl") allDates.push(ev.Date); });
+  if (!allDates.length) return;
+  allDates.sort();
+  calendarDate.value = allDates[0];
 }
 
-/* month navigation handlers */
-prevMonthBtn.addEventListener("click", () => {
-  calendarDateObj = new Date(calendarDateObj.getFullYear(), calendarDateObj.getMonth() - 1, 1);
-  renderCalendarFor(calendarDateObj);
-});
-nextMonthBtn.addEventListener("click", () => {
-  calendarDateObj = new Date(calendarDateObj.getFullYear(), calendarDateObj.getMonth() + 1, 1);
-  renderCalendarFor(calendarDateObj);
-});
-todayBtn.addEventListener("click", () => {
-  calendarDateObj = new Date();
-  renderCalendarFor(calendarDateObj);
-});
+/* UI bindings */
 
-/* Next Event button jumps to next event respecting filter */
-nextEventBtn.addEventListener("click", () => {
-  const nextIso = findNextEventDate(eventType);
-  if (!nextIso) return alert("No upcoming events found for that filter");
-  // set calendar viewport to that month and highlight day
-  const dt = parseDateIso(nextIso);
-  calendarDateObj = new Date(dt.getFullYear(), dt.getMonth(), 1);
-  renderCalendarFor(calendarDateObj);
-  // highlight day and call update
-  // find and click corresponding day element
-  const idx = dt.getDate();
-  setTimeout(() => {
-    const nodes = Array.from(document.querySelectorAll("#calendarGrid .calendar-day"));
-    // find n-th non-disabled day with text idx
-    for (const node of nodes) {
-      if (node.classList.contains("disabled")) continue;
-      if (parseInt(node.textContent,10) === idx) {
-        node.click();
-        break;
-      }
-    }
-  }, 10);
-});
-
-/* Events & UI handlers */
-
-/* toggle calendar display depending on eventsContent hidden flag */
+/* toggle calendar visibility depending on eventsContent visibility */
 function toggleCalendarPanel(){
   calendarContainer.style.display = eventsContent.hidden ? "none" : "block";
-  calendarContainer.setAttribute("aria-hidden", eventsContent.hidden ? "true" : "false");
 }
 
-/* UI bindings -------------------------------------------------- */
-
-/* show/hide calendar based on events panel */
-function updateCalendarVisibility() {
-  calendarContainer.style.display = eventsContent.hidden ? "none" : "block";
-}
-
-/* whenever the clubs panel changes height, reposition events panel */
-function repositionEventsSidebar() {
-  if (clubsContent.hidden) {
-    // clubs collapsed → events returns to default top
-    eventsSidebar.style.top = "128px";
-  } else {
-    // clubs open → place events directly below clubs
-    const offset = 70 + clubsContent.offsetHeight + 12; 
-    eventsSidebar.style.top = offset + "px";
-  }
-}
-
-/* ---------------- CLUBS TOGGLE ---------------- */
+/* Clubs toggle: when clubs open, events sidebar should be pushed down under clubs content (not hidden) */
 clubsToggle.onclick = () => {
-  clubsContent.hidden = !clubsContent.hidden;
-
-  repositionEventsSidebar();  // keep events panel tucked under clubs
-  updateCalendarVisibility();
-
-  // Mode always stays "clubs" unless user explicitly opens events
-  if (mode !== "events") {
-    mode = "clubs";
-    showAllClubs();
-  }
-};
-
-//* ---------------- EVENTS TOGGLE ---------------- */
-eventsToggle.onclick = () => {
-
-  // Auto-close clubs panel when Events is opened
-  const eventsIsOpening = eventsContent.hidden;  
-  if (eventsIsOpening && !clubsContent.hidden) {
-    clubsContent.hidden = true;
-  }
-
-  // Now toggle events panel normally
-  eventsContent.hidden = !eventsContent.hidden;
-
-  updateCalendarVisibility();
-  repositionEventsSidebar();
-
-  if (!eventsContent.hidden) {
-    // Switching INTO events mode
-    mode = "events";
-
-    if (!calendarDate.value) autoJumpToFirstEvent();
-    if (calendarDate.value) updateEventsByDate(parseDateIso(calendarDate.value));
-
+  const hiddenNow = clubsContent.hidden;
+  clubsContent.hidden = !hiddenNow;
+  // when clubs open, push events panel below clubs content
+  if (!clubsContent.hidden) {
+    const newTop = 70 + clubsContent.offsetHeight + 12; // 70 is base top
+    document.getElementById("eventsSidebar").style.top = newTop + "px";
   } else {
-    // Switching OUT of events mode
+    document.getElementById("eventsSidebar").style.top = "128px";
+  }
+  // keep eventsContent visible state unchanged; user wanted clubs open while events possibly open
+  mode = "clubs";
+  showAllClubs();
+  toggleCalendarPanel();
+};
+
+/* Events toggle: show/hide events content and make sure it's placed directly under clubs sidebar (not hiding clubs) */
+eventsToggle.onclick = () => {
+  const wasHidden = eventsContent.hidden;
+  eventsContent.hidden = !wasHidden;
+  // place events sidebar right under clubs header or clubs content depending on clubs open
+  if (clubsContent.hidden) {
+    document.getElementById("eventsSidebar").style.top = "128px";
+  } else {
+    const newTop = 70 + clubsContent.offsetHeight + 12;
+    document.getElementById("eventsSidebar").style.top = newTop + "px";
+  }
+  // if now opening events, switch mode and auto-jump
+  if (!eventsContent.hidden) {
+    mode = "events";
+    // show calendar
+    toggleCalendarPanel();
+    // auto-jump to first event date
+    autoJumpToFirstEvent();
+    if (calendarDate.value) {
+      updateEventsByDate(parseDateIso(calendarDate.value));
+    }
+  } else {
+    // hide calendar and show clubs again
+    toggleCalendarPanel();
     mode = "clubs";
     showAllClubs();
   }
 };
 
-
-
-/* event type filter buttons */
+/* event type filter */
 function setType(t){
   eventType = t;
   gamesBtn.classList.toggle("active", t === "games");
   practicesBtn.classList.toggle("active", t === "practices");
   allBtn.classList.toggle("active", t === "all");
-  // re-render calendar highlights and jump to next event for this filter if events are open
-  renderCalendarFor(calendarDateObj);
-  if (mode === "events") {
-    const nextIso = findNextEventDate(eventType);
-    if (nextIso) {
-      const dt = parseDateIso(nextIso);
-      calendarDateObj = new Date(dt.getFullYear(), dt.getMonth(), 1);
-      renderCalendarFor(calendarDateObj);
-      setTimeout(() => {
-        const nodes = Array.from(document.querySelectorAll("#calendarGrid .calendar-day"));
-        for (const node of nodes) {
-          if (node.classList.contains("disabled")) continue;
-          if (parseInt(node.textContent,10) === dt.getDate()) { node.click(); break; }
-        }
-      }, 20);
-    } else {
-      // clear markers
-      markers.forEach(({ marker }) => map.removeLayer(marker));
-      window._tempEventMarkers.forEach(m => map.removeLayer(m));
-      window._tempEventMarkers = [];
-    }
-  }
+  if (mode === "events" && calendarDate.value) updateEventsByDate(parseDateIso(calendarDate.value));
 }
 gamesBtn.onclick = () => setType("games");
 practicesBtn.onclick = () => setType("practices");
 allBtn.onclick = () => setType("all");
 
-/* map click clears locked popup */
-map.on("click", (e) => {
-  if (lastClickedMarker) {
-    try { lastClickedMarker.closePopup(); } catch(e){}
-    lastClickedMarker = null;
+/* calendar date changed */
+calendarDate.addEventListener("change", (e) => {
+  if (!e.target.value) return;
+  if (mode === "events") updateEventsByDate(parseDateIso(e.target.value));
+});
+
+/* map zoom: rescale icons and reapply overlap fades and current mode behavior */
+map.on("zoomend", () => {
+  refreshIcons();
+  applyOverlapFades();
+  if (mode === "events" && calendarDate.value) {
+    updateEventsByDate(parseDateIso(calendarDate.value));
+  } else {
+    showAllClubs();
   }
 });
 
-/* map zoom - rescale icons and reapply behaviors */
-map.on("zoomend", () => {
-  refreshIcons();
-});
-
-/* periodic full refresh */
+/* periodic refresh */
 let refreshTimer = null;
 async function fullRefresh(){
   try {
@@ -750,22 +689,8 @@ async function fullRefresh(){
     await loadEvents();
     startTicker();
     // re-show appropriate mode
-    if (mode === "events") {
-      const nextIso = findNextEventDate(eventType) || toIsoDate(new Date());
-      const dt = parseDateIso(nextIso);
-      calendarDateObj = new Date(dt.getFullYear(), dt.getMonth(), 1);
-      renderCalendarFor(calendarDateObj);
-      // click the day programmatically
-      setTimeout(() => {
-        const nodes = Array.from(document.querySelectorAll("#calendarGrid .calendar-day"));
-        for (const node of nodes) {
-          if (node.classList.contains("disabled")) continue;
-          if (parseInt(node.textContent,10) === dt.getDate()) { node.click(); break; }
-        }
-      }, 20);
-    } else {
-      showAllClubs();
-    }
+    if (mode === "events" && calendarDate.value) updateEventsByDate(parseDateIso(calendarDate.value));
+    else showAllClubs();
   } catch (err) {
     console.error("refresh error", err);
   }
@@ -774,15 +699,16 @@ refreshTimer = setInterval(fullRefresh, REFRESH_MS);
 
 /* initial boot */
 (async function init(){
+  loadDefaultClubs();
   try {
     await loadClubs();
     await loadEvents();
     startTicker();
-    // calendar initial month
-    calendarDateObj = new Date();
-    renderCalendarFor(calendarDateObj);
-    // default club view
+    // auto-jump to earliest event if events content was opened later
+    autoJumpToFirstEvent();
+    // default view
     showAllClubs();
+    // show calendar only if events open
     toggleCalendarPanel();
   } catch (err) {
     console.error("init error", err);
