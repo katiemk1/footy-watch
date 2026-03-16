@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Find Women's Footy</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +15,10 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body { font-family: 'Sora', Arial, sans-serif; }
+body {
+  font-family: 'Sora', Arial, sans-serif;
+  font-size: 16px;
+}
 
 #map { height: 100vh; }
 
@@ -60,9 +64,22 @@ body { font-family: 'Sora', Arial, sans-serif; }
   animation: scroll 160s linear infinite;
 }
 
-@keyframes scroll {
+/* slower ticker on phones */
+@media (max-width:700px) {
+  #tickerText {
+    font-size: 14px;
+    animation: scroll 240s linear infinite;
+  }
+}
+
+/* @keyframes scroll {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-100%); }
+} */
+
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
 
 /* ── Sidebars ── */
@@ -311,6 +328,38 @@ body { font-family: 'Sora', Arial, sans-serif; }
 
 .marker-cluster-large { background-color: rgba(37,99,235,0.25); }
 .marker-cluster-large div { background-color: rgba(37,99,235,0.65); color: white; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 600; }
+
+@media (max-width: 700px) {
+
+  body {
+    font-size: 17px;
+  }
+
+  #tickerText {
+    font-size: 14px;
+  }
+
+  .header {
+    font-size: 13px;
+  }
+
+  .club-name {
+    font-size: 16px;
+  }
+
+  .legend-row {
+    font-size: 15px;
+  }
+
+  .event-row {
+    font-size: 15px;
+  }
+
+  #eventList {
+    font-size: 15px;
+  }
+
+}
 </style>
 </head>
 
@@ -403,7 +452,7 @@ const events = [
   {club:"DC Eagles",       date:"2026-05-09", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
   {club:"DC Eagles",       date:"2026-05-12", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
   {club:"DC Eagles",       date:"2026-05-26", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"USAFL",           date:"2026-07-11", type:"game",      category:"league-tournament", lat:44.9778, lon:-93.3, subtitle:"Regionals"},
+  {club:"USAFL",           date:"2026-07-11", type:"game",      category:"league-tournament", lat:44.9778, lon:-93.3, subtitle:"Regionals - Minnesota"},
   {club:"New York Magpies",date:"2026-09-11", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:null},
   {club:"DC Eagles",       date:"2026-05-30", type:"game",      category:"club-metro",        lat:null, lon:null, subtitle:null},
   {club:"DC Eagles",       date:"2026-06-02", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
@@ -434,7 +483,7 @@ const events = [
   {club:"DC Eagles",       date:"2026-10-03", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
   {club:"DC Eagles",       date:"2026-10-06", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
   {club:"DC Eagles",       date:"2026-10-13", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"USAFL",           date:"2026-10-17", type:"game",      category:"league-tournament", lat:null, lon:null, subtitle:null}
+  {club:"USAFL",           date:"2026-10-17", type:"game",      category:"league-tournament", lat:28.5383, lon:-81.3792, subtitle:"Nationals — Orlando"}
 ];
 
 /* ── STATE ── */
@@ -458,6 +507,14 @@ map.addLayer(cluster);
 /* ── ICON HELPERS ── */
 function getLogoSize() {
   const z = map.getZoom();
+
+  if (window.innerWidth < 700) {
+    if (z >= 7) return 80;
+    if (z >= 6) return 60;
+    if (z >= 5) return 48;
+    return 40;
+  }
+
   if (z >= 7) return 70;
   if (z >= 6) return 50;
   if (z >= 5) return 40;
@@ -584,7 +641,16 @@ document.getElementById("datePicker").addEventListener("change", e => showEvents
 
 function showEventsForDate(date) {
   const list = document.getElementById("eventList");
-  if (leagueMarker) { map.removeLayer(leagueMarker); leagueMarker = null; }
+
+  if (leagueMarker) {
+    map.removeLayer(leagueMarker);
+    leagueMarker = null;
+  }
+
+  /* reset all club icons */
+  Object.values(clubMarkers).forEach(marker => {
+    marker.setIcon(createClubIcon(marker.club.logo));
+  });
 
   const dayEvents = events.filter(e => e.date === date);
 
@@ -594,16 +660,34 @@ function showEventsForDate(date) {
   }
 
   list.innerHTML = `<b>${date}</b>`;
+
   dayEvents.forEach(e => {
+
     const color = dotColor(e.category);
     const label = formatEventType(e);
     const sub = e.subtitle ? ` — ${e.subtitle}` : "";
-    list.innerHTML += `<div class="event-row"><div class="event-dot" style="background:${color};"></div>${e.club} ${label}${sub}</div>`;
 
+    list.innerHTML += `
+      <div class="event-row">
+        <div class="event-dot" style="background:${color};"></div>
+        ${e.club} ${label}${sub}
+      </div>
+    `;
+
+    /* highlight club marker */
+    if (clubMarkers[e.club]) {
+      const club = clubMarkers[e.club].club;
+      clubMarkers[e.club].setIcon(
+        createEventIcon(club.logo, ringColor(e))
+      );
+    }
+
+    /* league event marker */
     if (e.category === "league-tournament" && e.lat) {
       leagueMarker = L.marker([e.lat, e.lon], { icon: createLeagueIcon() }).addTo(map);
       map.flyTo([e.lat, e.lon], 5);
     }
+
   });
 }
 
