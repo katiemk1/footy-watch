@@ -87,7 +87,7 @@ body {
   position: absolute;
   right: 12px;
   width: 248px;
-  background: rgba(135, 206, 250,0.82);
+  background: rgba(135, 206, 250,0.3);
   border: 0.5px solid rgba(0,0,0,0.1);
   border-radius: 12px;
   backdrop-filter: blur(16px);
@@ -95,6 +95,13 @@ body {
   overflow: hidden;
   z-index: 1000;
   transition: top 0.25s ease;
+}
+
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  flex-shrink: 0;
 }
 
 .header {
@@ -359,7 +366,64 @@ body {
     font-size: 15px;
   }
 
+  /* collapse sidebars to circular buttons */
+  .sidebar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    overflow: hidden;
+    padding: 0;
+    transition:all .25s ease;
+  }
+   
+  .sidebar.expanded {
+    width: calc(100% - 20px);
+    height: auto;
+    border-radius: 12px;
+  }
+
+  .sidebar:nth-of-type(1) {
+    top: 60px;
+    right: 10px;
+  }
+
+  .sidebar:nth-of-type(2) {
+    top: 120px;
+    right: 10px;
+  }
+
+  .sidebar-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .header {
+    justify-content: center;
+    font-size: 0;
+    padding: 0;
+    height: 52px;
+  }
+
+  .header::after {
+    display: none;
+  }
+
+  .sidebar.expanded .header {
+    font-size: 13px;
+    justify-content: space-between;
+    padding: 10px 14px;
+  }
+
+  .content {
+    display: none;
+  }
+
+  .sidebar.expanded .content {
+    display: block;
+  }
+
 }
+
 </style>
 </head>
 
@@ -373,14 +437,29 @@ body {
 </div>
 
 <!-- Teams sidebar -->
+    
 <div class="sidebar" style="top:62px">
-  <div class="header" id="clubsHeader" onclick="toggle('clubsContent')">Women's Football Teams</div>
+
+  <div class="header" id="clubsHeader" onclick="toggle('clubsContent')">
+
+    <svg class="sidebar-icon" viewBox="0 0 120 60">
+      <ellipse cx="60" cy="30" rx="55" ry="25" fill="#c1121f"/>
+      <ellipse cx="60" cy="30" rx="42" ry="18" fill="#facc15"/>
+      <line x1="35" y1="30" x2="85" y2="30" stroke="white" stroke-width="3"/>
+    </svg>
+
+    <span class="label">Women's Football Teams</span>
+
+  </div>
+
   <div class="content" id="clubsContent"></div>
+
 </div>
+
 
 <!-- Events sidebar -->
 <div class="sidebar" style="top:108px">
-  <div class="header" id="eventsHeader" onclick="toggle('eventsContent')">Events</div>
+  <div class="header" id="eventsHeader" onclick="toggle('eventsContent')">📅<span class="label">Events</span></div>
   <div class="content" id="eventsContent">
     <div style="padding: 6px 0 2px;">
       <div class="legend-row"><div class="legend-dot" style="background:#60a5fa;"></div> Club Metro</div>
@@ -434,26 +513,26 @@ const clubs = [
 ];
 
 const events = [
-  {club:"DC Eagles",       date:"2026-03-14", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles",       date:"2026-03-17", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles",       date:"2026-03-21", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles",       date:"2026-03-24", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles",       date:"2026-03-28", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles",       date:"2026-03-31", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles",       date:"2026-04-07", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles",       date:"2026-04-14", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-03-14", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 10am-12pm"},
+  {club:"DC Eagles",       date:"2026-03-17", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
+  {club:"DC Eagles",       date:"2026-03-21", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 10am-12pm"},
+  {club:"DC Eagles",       date:"2026-03-24", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
+  {club:"DC Eagles",       date:"2026-03-28", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 10am-12pm"},
+  {club:"DC Eagles",       date:"2026-03-31", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
+  {club:"DC Eagles",       date:"2026-04-07", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
+  {club:"DC Eagles",       date:"2026-04-14", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
   {club:"Bayou Brawlers",  date:"2026-04-18", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-04-18", type:"game",      category:"club-metro",        lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles",       date:"2026-04-21", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles",       date:"2026-04-25", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles",       date:"2026-04-28", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-04-18", type:"game",      category:"club-metro",        lat:null, lon:null, subtitle:"West Potomac Park 10am-12pm"},
+  {club:"DC Eagles",       date:"2026-04-21", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
+  {club:"DC Eagles",       date:"2026-04-25", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Par 10am-12pm"},
+  {club:"DC Eagles",       date:"2026-04-28", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
   {club:"DC Eagles",       date:"2026-05-02", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:"DC v NY"},
-  {club:"DC Eagles",       date:"2026-05-05", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-05-05", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
   {club:"DC Eagles",       date:"2026-05-09", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
   {club:"DC Eagles",       date:"2026-05-12", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
   {club:"DC Eagles",       date:"2026-05-26", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
   {club:"USAFL",           date:"2026-07-11", type:"game",      category:"league-tournament", lat:44.9778, lon:-93.3, subtitle:"Regionals - Minnesota"},
-  {club:"New York Magpies",date:"2026-09-11", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:null},
+  {club:"New York Magpies",date:"2026-09-12", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:null},
   {club:"DC Eagles",       date:"2026-05-30", type:"game",      category:"club-metro",        lat:null, lon:null, subtitle:null},
   {club:"DC Eagles",       date:"2026-06-02", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
   {club:"DC Eagles",       date:"2026-06-06", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
@@ -743,16 +822,29 @@ clubs.forEach(club => {
 
 /* ── SIDEBAR TOGGLE ── */
 function toggle(id) {
+
   const clubsContent  = document.getElementById("clubsContent");
   const eventsContent = document.getElementById("eventsContent");
   const clubsHeader   = document.getElementById("clubsHeader");
   const eventsHeader  = document.getElementById("eventsHeader");
+
+  const clubsSidebar  = document.querySelectorAll(".sidebar")[0];
   const eventsSidebar = document.querySelectorAll(".sidebar")[1];
 
+  const isMobile = window.innerWidth < 700;
+
   if (id === "clubsContent") {
+
     const isOpen = clubsContent.style.display === "block";
+
     clubsContent.style.display = isOpen ? "none" : "block";
     clubsHeader.classList.toggle("open", !isOpen);
+
+    if (isMobile) {
+      clubsSidebar.classList.toggle("expanded", !isOpen);
+      eventsSidebar.classList.remove("expanded");
+    }
+
     if (isOpen) {
       map.setView(defaultView, defaultZoom);
       eventsSidebar.style.top = "108px";
@@ -760,12 +852,20 @@ function toggle(id) {
       const h = Math.min(clubsContent.scrollHeight, 280);
       eventsSidebar.style.top = (62 + 40 + h + 8) + "px";
     }
+
   }
 
   if (id === "eventsContent") {
+
     const isOpen = eventsContent.style.display === "block";
+
     eventsContent.style.display = isOpen ? "none" : "block";
     eventsHeader.classList.toggle("open", !isOpen);
+
+    if (isMobile) {
+      eventsSidebar.classList.toggle("expanded", !isOpen);
+      clubsSidebar.classList.remove("expanded");
+    }
     if (!isOpen) {
       clubsContent.style.display = "none";
       clubsHeader.classList.remove("open");
