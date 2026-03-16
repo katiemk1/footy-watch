@@ -31,7 +31,7 @@ body{margin:0;font-family:Arial}
 #ticker span{
   display:inline-block;
   padding-left:100%;
-  animation:scroll 30s linear infinite
+  animation:scroll 90s linear infinite
 }
 @keyframes scroll{
   0%{transform:translateX(0)}
@@ -261,9 +261,10 @@ clubs.forEach(club=>{
 
   marker.on("mouseover",()=>{
     const next=getUpcomingEvents(club.name,1)[0];
+    const instagram=club.instagram?`<br><a href="https://www.instagram.com/${club.instagram.replace("@","")}/" target="_blank">${club.instagram}</a>`:"";
+    marker.bindTooltip(`<b>${club.name}</b>${instagram}`)
     if(!next) return;
     const typeLabel=next.type==="practice"?"Practice":next.category==="club-metro"?"Club Metro":"Club Tournament";
-    const instagram=club.instagram?`<br><a href="https://www.instagram.com/${club.instagram.replace("@","")}/" target="_blank">${club.instagram}</a>`:"";
     marker.bindTooltip(`<b>${club.name}</b>${instagram}<br>Next Event: ${next.date}<br>${typeLabel}`,{direction:"top",offset:[0,-10],opacity:0.9,sticky:true,className:"club-tooltip"}).openTooltip();
   });
   marker.on("mouseout",()=>marker.closeTooltip());
@@ -271,6 +272,7 @@ clubs.forEach(club=>{
   cluster.addLayer(marker);
   clubMarkers[club.name]=marker;
 });
+
 
 /* ---------------- ZOOM ICON RESIZE ---------------- */
 map.on("zoomend",()=>{
