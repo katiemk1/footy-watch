@@ -4,128 +4,348 @@
 <meta charset="utf-8">
 <title>Find Women's Footy</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 
 <style>
-body{margin:0;font-family:Arial}
-#map{height:100vh}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Transparent ticker */
-#ticker{
-  position:absolute;
-  top:8px;
-  left:80px;
-  right:20px;
-  background:rgba(11,102,178,0.85);
-  color:white;
-  padding:12px 20px;
-  font-weight:bold;
-  z-index:900;
-  white-space:nowrap;
-  overflow:hidden;
-  border-radius:8px;
-  backdrop-filter:blur(4px);
-}
-#ticker span{
-  display:inline-block;
-  padding-left:100%;
-  animation:scroll 90s linear infinite
-}
-@keyframes scroll{
-  0%{transform:translateX(0)}
-  100%{transform:translateX(-100%)}
+body { font-family: 'Sora', Arial, sans-serif; }
+
+#map { height: 100vh; }
+
+/* ── Ticker ── */
+#ticker {
+  position: absolute;
+  top: 12px;
+  left: 56px;
+  right: 12px;
+  height: 38px;
+  background: rgba(135, 206, 250,0.82);
+  border: 0.5px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  z-index: 900;
 }
 
-/* Sidebars */
-.sidebar{
-  position:absolute;
-  right:10px;
-  width:270px;
-  background:white;
-  border-radius:10px;
-  box-shadow:0 6px 18px rgba(0,0,0,.2);
-  overflow:hidden;
-  z-index:1000;
-  transition:top .25s ease;
-}
-.header{
-  background:#0b66b2;
-  color:white;
-  padding:8px;
-  font-weight:bold;
-  cursor:pointer
-}
-.content{
-  display:none;
-  max-height:320px;
-  overflow:auto;
-  padding:8px
+#ticker-badge {
+  background: #2563eb;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 5px;
+  margin: 0 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* Club cards */
-.club{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:6px;
-  cursor:pointer
-}
-.club img{
-  width:28px;
-  height:28px;
-  border-radius:50%;
+#tickerText {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: rgba(40,50,70,1);
+  white-space: nowrap;
+  display: inline-block;
+  padding-left: 100%;
+  animation: scroll 160s linear infinite;
 }
 
-/* Event types */
-.eventGameMetro{color:#66ccff}
-.eventGameTournament{color:#003366}
-.eventPractice{color:#32cd32}
-
-/* Calendar */
-#calendar{
-  position:absolute;
-  bottom:12px;
-  right:12px;
-  background:white;
-  padding:10px;
-  border-radius:8px;
-  box-shadow:0 4px 12px rgba(0,0,0,.2);
-  z-index:1000
-}
-#eventList{
-  margin-top:8px;
-  font-size:13px
+@keyframes scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
 }
 
-/* Tooltip */
-.leaflet-tooltip.club-tooltip{font-family:Arial;font-size:13px;text-align:center;transition:all 0.3s ease;}
+/* ── Sidebars ── */
+.sidebar {
+  position: absolute;
+  right: 12px;
+  width: 248px;
+  background: rgba(135, 206, 250,0.82);
+  border: 0.5px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+  z-index: 1000;
+  transition: top 0.25s ease;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0,0,0,0.03);
+  border-bottom: 0.5px solid rgba(0,0,0,0.07);
+  color: rgba(30,40,60,0.55);
+  padding: 10px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+}
+
+.header::after {
+  content: '›';
+  font-size: 16px;
+  font-weight: 400;
+  opacity: 0.4;
+  transition: transform 0.2s;
+}
+
+.header.open::after {
+  transform: rotate(90deg);
+}
+
+.content {
+  display: none;
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  padding: 6px 0;
+}
+
+/* ── Club cards ── */
+.club {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.club:hover { background: rgba(0,0,0,0.04); }
+
+.club.active { background: rgba(37,99,235,0.08); }
+
+.club img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 0.5px solid rgba(0,0,0,0.1);
+  object-fit: cover;
+  background: rgba(0,0,0,0.04);
+  flex-shrink: 0;
+}
+
+.club-name {
+  font-size: 12px;
+  color: rgba(30,40,60,0.8);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.club.active .club-name {
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+/* ── Event legend in sidebar ── */
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: rgba(30,40,60,0.65);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-divider {
+  margin: 4px 14px;
+  border: none;
+  border-top: 0.5px solid rgba(0,0,0,0.07);
+}
+
+/* ── Event type colors ── */
+.eventGameMetro    { color: #2563eb; }
+.eventGameTournament { color: #6366f1; }
+.eventLeague       { color: #d97706; }
+.eventPractice     { color: #16a34a; }
+
+/* ── Calendar panel ── */
+#calendar {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 248px;
+  background: rgba(255,255,255,0.88);
+  border: 0.5px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 1000;
+  padding: 12px 14px;
+}
+
+.cal-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(30,40,60,0.35);
+  margin-bottom: 8px;
+}
+
+#datePicker {
+  width: 100%;
+  background: rgba(0,0,0,0.04);
+  border: 0.5px solid rgba(0,0,0,0.12);
+  border-radius: 6px;
+  color: rgba(30,40,60,0.85);
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  padding: 7px 10px;
+  margin-bottom: 10px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  color-scheme: light;
+}
+
+#datePicker:focus { border-color: rgba(37,99,235,0.4); }
+
+#eventList {
+  font-size: 12px;
+  color: rgba(30,40,60,0.65);
+}
+
+#eventList b {
+  display: block;
+  color: rgba(30,40,60,0.4);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.event-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  font-size: 11px;
+  color: rgba(30,40,60,0.7);
+}
+
+.event-row:last-child { border-bottom: none; }
+
+.event-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Leaflet overrides ── */
+.leaflet-control-zoom a {
+  background: rgba(255,255,255,0.9) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: rgba(30,40,60,0.7) !important;
+  backdrop-filter: blur(12px);
+}
+
+.leaflet-control-zoom a:hover {
+  background: rgba(37,99,235,0.1) !important;
+  color: #2563eb !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(255,255,255,0.75) !important;
+  color: rgba(30,40,60,0.4) !important;
+  font-size: 10px !important;
+}
+
+.leaflet-control-attribution a { color: rgba(37,99,235,0.7) !important; }
+
+/* ── Tooltip ── */
+.leaflet-tooltip.club-tooltip {
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  background: rgba(255,255,255,0.95);
+  border: 0.5px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  color: rgba(30,40,60,0.85);
+  padding: 8px 12px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+.leaflet-tooltip.club-tooltip::before {
+  border-top-color: rgba(0,0,0,0.1);
+}
+
+/* ── Cluster marker tweaks ── */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background-clip: padding-box;
+}
+
+.marker-cluster-small { background-color: rgba(37,99,235,0.15); }
+.marker-cluster-small div { background-color: rgba(37,99,235,0.5); color: white; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 600; }
+
+.marker-cluster-medium { background-color: rgba(37,99,235,0.2); }
+.marker-cluster-medium div { background-color: rgba(37,99,235,0.55); color: white; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 600; }
+
+.marker-cluster-large { background-color: rgba(37,99,235,0.25); }
+.marker-cluster-large div { background-color: rgba(37,99,235,0.65); color: white; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 600; }
 </style>
 </head>
 
 <body>
 <div id="map"></div>
 
-<div id="ticker"><span id="tickerText">Loading events...</span></div>
+<!-- Ticker -->
+<div id="ticker">
+  <div id="ticker-badge">Upcoming</div>
+  <span id="tickerText">Loading events...</span>
+</div>
 
-<div class="sidebar" style="top:60px">
-  <div class="header" onclick="toggle('clubsContent')">Women's Football Teams</div>
+<!-- Teams sidebar -->
+<div class="sidebar" style="top:62px">
+  <div class="header" id="clubsHeader" onclick="toggle('clubsContent')">Women's Football Teams</div>
   <div class="content" id="clubsContent"></div>
 </div>
 
-<div class="sidebar" style="top:100px">
-  <div class="header" onclick="toggle('eventsContent')">Events</div>
+<!-- Events sidebar -->
+<div class="sidebar" style="top:108px">
+  <div class="header" id="eventsHeader" onclick="toggle('eventsContent')">Events</div>
   <div class="content" id="eventsContent">
-    <div style="margin-top:0px;font-size:13px">
-      <div><span style="color:#66ccff">●</span> Club Metro</div>
-      <div><span style="color:#003366">●</span> Club Tournament</div>
-      <div><span style="color:#32cd32">●</span> Practice</div>
+    <div style="padding: 6px 0 2px;">
+      <div class="legend-row"><div class="legend-dot" style="background:#60a5fa;"></div> Club Metro</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#818cf8;"></div> Club Tournament</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#4ade80;"></div> Practice</div>
+      <hr class="legend-divider">
+      <div class="legend-row"><div class="legend-dot" style="background:#f59e0b;"></div> League Tournament</div>
     </div>
   </div>
 </div>
 
+<!-- Calendar -->
 <div id="calendar">
+  <div class="cal-label">Browse by date</div>
   <input type="date" id="datePicker">
   <div id="eventList"></div>
 </div>
@@ -134,217 +354,339 @@ body{margin:0;font-family:Arial}
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <script>
-/* ---------------- DATA ---------------- */
-/* ---------------- DATA ---------------- */
+/* ── DATA ── */
 const clubs = [
-{ name:"Arizona Lady Hawks", lat:33.4484, lon:-112.074, instagram:"@azhawks", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/AZHawks-1-768x681.png"},
-{ name:"Atlanta Kookaburas", lat:33.749, lon:-84.388, instagram:"@atlkookaburras", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/AtlantaKookaburras2012-1-768x606.png"},
-{ name:"Austin Crows", lat:30.2672, lon:-97.7431, instagram:"@austincrows", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Austin-Crows-shield-logo-1-768x538.png"},
-{ name:"Baton Rouge Tigers", lat:30.4515, lon:-91.1871, instagram:"@brfooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/BRT_Tiger20Head-2-e1721771864128.png"},
-{ name:"Bayou Brawlers", lat:29.9511, lon:-90.0715, instagram:"@bayou.brawlers.arfc", logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/Bayou20Brawlers2028229.png"},
-{ name:"Boston Demons", lat:42.36, lon:-71.06, instagram:"@boston_demons", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Boston_logo-1-768x841.png"},
-{ name:"Chicago Swans", lat:41.8781, lon:-87.6298, instagram:"@chicagofooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/cafa_logo_300x400-1-3.png"},
-{ name:"Cincinnati Dockers", lat:39.1031, lon:-84.512, instagram:"@cincinattidockers", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Cincinnati-Dockers-400w-2.png"},
-{ name:"Columbus Cats", lat:39.9612, lon:-82.9988, instagram:"@columbusfooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/ColumbusCats-3.png"},
-{ name:"DC Eagles", lat:38.88639255, lon:-77.04867424, instagram:"@dceaglesfc", logo:"https://aussierulesusa.com/wp-content/uploads/2025/02/dc-eagles.png"},
-{ name:"Denver Bulldogs", lat:39.7392, lon:-104.9903, instagram:"@denverbulldogsfooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Denver-768x666.png"},
-{ name:"Golden Gate", lat:37.7749, lon:-122.4194, instagram:"@ggafl", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/GGAFL_gradient-768x781.png"},
-{ name:"Hawai'i Eagles", lat:21.3069, lon:-157.8583, instagram:"@hawaiieagles", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/HawaiiLogoNew2-1.png"},
-{ name:"Houston Lonestars", lat:29.7604, lon:-95.3698, instagram:"@houston_lonestars", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/HoustonSq2.png"},
-{ name:"Minnesota Freeze", lat:44.9778, lon:-93.3, instagram:"@mnfreezefooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Freeze-logo-400w.png"},
-{ name:"New York Magpies", lat:40.7128, lon:-74.006, instagram:"@newyorkmagpies", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/NYMagpiesBW.png"},
-{ name:"North Star Blue Ox", lat:44.95, lon:-93.09, instagram:"@northstarblueoxfootyclub", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/BlueOxLogoCropped.png"},
-{ name:"North Texas Devils", lat:33.0198, lon:-96.6989, instagram:"@ntxdevilswomen", logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/NTX-Devils-Logo-full-RGB.jpg"},
-{ name:"Orange County Giants", lat:33.6846, lon:-117.8265, instagram:"@ocgiants", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/OCSquare.png"},
-{ name:"Philadelphia Hawks", lat:39.9526, lon:-75.1652, instagram:"@phillyhawks", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/PhillyHawks-2013.png"},
-{ name:"Portland Sockeyes", lat:45.461745, lon:-122.679117, instagram:"@portland_afc", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/pafc.club_.transparent-768x768.png"},
-{ name:"Sacramento Suns", lat:38.5816, lon:-121.4944, instagram:"@sacfooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/SacramentoSuns_0.png"},
-{ name:"Saint Louis Australian Football Club", lat:38.627, lon:-90.1994, instagram:"@stlaustralianfootball", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/STL20Logo202022-1-768x768.jpeg"},
-{ name:"Seattle Grizzlies", lat:47.6062, lon:-122.3321, instagram:"@seattlegrizzlies", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/seattle_grizzlies-1-768x792.png"},
-{ name:"Virginia Lions", lat:37.5407, lon:-77.436, instagram:"@vafooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/virginia_lions_square_0-1-768x994.png"},
-{ name:"Wasatch WarGulls", lat:40.7608, lon:-111.891, instagram:"@wasatchwargulls", logo:"https://aussierulesusa.com/wp-content/uploads/2025/03/image0.png"}
+  { name:"Arizona Lady Hawks",    lat:33.4484,  lon:-112.074,   instagram:"@azhawks",                    logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/AZHawks-1-768x681.png"},
+  { name:"Atlanta Kookaburas",    lat:33.749,   lon:-84.388,    instagram:"@atlkookaburras",             logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/AtlantaKookaburras2012-1-768x606.png"},
+  { name:"Austin Crows",          lat:30.2672,  lon:-97.7431,   instagram:"@austincrows",                logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Austin-Crows-shield-logo-1-768x538.png"},
+  { name:"Baton Rouge Tigers",    lat:30.4515,  lon:-91.1871,   instagram:"@brfooty",                   logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/BRT_Tiger20Head-2-e1721771864128.png"},
+  { name:"Bayou Brawlers",        lat:29.9511,  lon:-90.0715,   instagram:"@bayou.brawlers.arfc",       logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/Bayou20Brawlers2028229.png"},
+  { name:"Boston Demons",         lat:42.36,    lon:-71.06,     instagram:"@boston_demons",              logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Boston_logo-1-768x841.png"},
+  { name:"Chicago Swans",         lat:41.8781,  lon:-87.6298,   instagram:"@chicagofooty",              logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/cafa_logo_300x400-1-3.png"},
+  { name:"Cincinnati Dockers",    lat:39.1031,  lon:-84.512,    instagram:"@cincinattidockers",         logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Cincinnati-Dockers-400w-2.png"},
+  { name:"Columbus Cats",         lat:39.9612,  lon:-82.9988,   instagram:"@columbusfooty",             logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/ColumbusCats-3.png"},
+  { name:"DC Eagles",             lat:38.88639, lon:-77.04867,  instagram:"@dceaglesfc",                logo:"https://aussierulesusa.com/wp-content/uploads/2025/02/dc-eagles.png"},
+  { name:"Denver Bulldogs",       lat:39.7392,  lon:-104.9903,  instagram:"@denverbulldogsfooty",       logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Denver-768x666.png"},
+  { name:"Golden Gate",           lat:37.7749,  lon:-122.4194,  instagram:"@ggafl",                     logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/GGAFL_gradient-768x781.png"},
+  { name:"Hawai'i Eagles",        lat:21.3069,  lon:-157.8583,  instagram:"@hawaiieagles",              logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/HawaiiLogoNew2-1.png"},
+  { name:"Houston Lonestars",     lat:29.7604,  lon:-95.3698,   instagram:"@houston_lonestars",         logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/HoustonSq2.png"},
+  { name:"Minnesota Freeze",      lat:44.9778,  lon:-93.3,      instagram:"@mnfreezefooty",             logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Freeze-logo-400w.png"},
+  { name:"New York Magpies",      lat:40.7128,  lon:-74.006,    instagram:"@newyorkmagpies",            logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/NYMagpiesBW.png"},
+  { name:"North Star Blue Ox",    lat:44.95,    lon:-93.09,     instagram:"@northstarblueoxfootyclub",  logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/BlueOxLogoCropped.png"},
+  { name:"North Texas Devils",    lat:33.0198,  lon:-96.6989,   instagram:"@ntxdevilswomen",            logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/NTX-Devils-Logo-full-RGB.jpg"},
+  { name:"Orange County Giants",  lat:33.6846,  lon:-117.8265,  instagram:"@ocgiants",                  logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/OCSquare.png"},
+  { name:"Philadelphia Hawks",    lat:39.9526,  lon:-75.1652,   instagram:"@phillyhawks",               logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/PhillyHawks-2013.png"},
+  { name:"Portland Sockeyes",     lat:45.461745,lon:-122.679117,instagram:"@portland_afc",              logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/pafc.club_.transparent-768x768.png"},
+  { name:"Sacramento Suns",       lat:38.5816,  lon:-121.4944,  instagram:"@sacfooty",                  logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/SacramentoSuns_0.png"},
+  { name:"Saint Louis AFC",       lat:38.627,   lon:-90.1994,   instagram:"@stlaustralianfootball",     logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/STL20Logo202022-1-768x768.jpeg"},
+  { name:"Seattle Grizzlies",     lat:47.6062,  lon:-122.3321,  instagram:"@seattlegrizzlies",          logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/seattle_grizzlies-1-768x792.png"},
+  { name:"Virginia Lions",        lat:37.5407,  lon:-77.436,    instagram:"@vafooty",                   logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/virginia_lions_square_0-1-768x994.png"},
+  { name:"Wasatch WarGulls",      lat:40.7608,  lon:-111.891,   instagram:"@wasatchwargulls",           logo:"https://aussierulesusa.com/wp-content/uploads/2025/03/image0.png"}
 ];
 
-/* ---------------- EVENTS ---------------- */
 const events = [
-  {club:"DC Eagles", date:"2026-03-14", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-03-17", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-03-21", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-03-24", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-03-28", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-03-31", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-04-07", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-04-14", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"Bayou Brawlers", date:"2026-04-18", type:"game", category:"club-tournament", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-04-18", type:"game", category:"club-metro", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-04-21", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-04-25", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-04-28", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-05-02", type:"game", category:"club-tournament", lat:null, lon:null, subtitle:"DC v NY"},
-  {club:"DC Eagles", date:"2026-05-05", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-05-09", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-05-12", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles", date:"2026-05-26", type:"practice", category:"practice", lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"USAFL", date:"2026-07-11", type:"game", category:"league-tournament", lat:44.9778, lon:-93.3, subtitle:"Regionals"},
-  {club:"New York Magpies", date:"2026-09-11", type:"game", category:"club-tournament", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-05-30", type:"game", category:"club-metro", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-06-02", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-06-06", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-06-09", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-06-16", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-06-23", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-06-27", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-06-30", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-07-07", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-08-01", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-08-04", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-08-08", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-08-11", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-08-15", type:"game", category:"club-metro", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-08-18", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-08-22", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-08-25", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-08-29", type:"game", category:"club-metro", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-09-01", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-09-08", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-09-12", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-09-15", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"New York Magpies", date:"2026-09-19", type:"game", category:"club-tournament", lat:null, lon:null, subtitle:"NY v DC"},
-  {club:"DC Eagles", date:"2026-09-22", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-09-26", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-09-29", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-10-03", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-10-06", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles", date:"2026-10-13", type:"practice", category:"practice", lat:null, lon:null, subtitle:null},
-  {club:"USAFL", date:"2026-10-17", type:"game", category:"league-tournament", lat:null, lon:null, subtitle:null}
+  {club:"DC Eagles",       date:"2026-03-14", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-03-17", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-03-21", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-03-24", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-03-28", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-03-31", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-04-07", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-04-14", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"Bayou Brawlers",  date:"2026-04-18", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-04-18", type:"game",      category:"club-metro",        lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-04-21", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-04-25", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-04-28", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-05-02", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:"DC v NY"},
+  {club:"DC Eagles",       date:"2026-05-05", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-05-09", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-05-12", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"DC Eagles",       date:"2026-05-26", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
+  {club:"USAFL",           date:"2026-07-11", type:"game",      category:"league-tournament", lat:44.9778, lon:-93.3, subtitle:"Regionals"},
+  {club:"New York Magpies",date:"2026-09-11", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-05-30", type:"game",      category:"club-metro",        lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-06-02", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-06-06", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-06-09", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-06-16", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-06-23", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-06-27", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-06-30", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-07-07", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-08-01", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-08-04", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-08-08", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-08-11", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-08-15", type:"game",      category:"club-metro",        lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-08-18", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-08-22", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-08-25", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-08-29", type:"game",      category:"club-metro",        lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-09-01", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-09-08", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-09-12", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-09-15", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"New York Magpies",date:"2026-09-19", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:"NY v DC"},
+  {club:"DC Eagles",       date:"2026-09-22", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-09-26", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-09-29", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-10-03", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-10-06", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"DC Eagles",       date:"2026-10-13", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
+  {club:"USAFL",           date:"2026-10-17", type:"game",      category:"league-tournament", lat:null, lon:null, subtitle:null}
 ];
 
-/* ---------------- STATE ---------------- */
-let selectedClub=null;
-const clubMarkers={};
-let leagueMarker=null;
-const defaultView=[39,-96], defaultZoom=4;
+/* ── STATE ── */
+let selectedClub = null;
+const clubMarkers = {};
+let leagueMarker = null;
+const defaultView = [39, -96], defaultZoom = 4;
 
-/* ---------------- MAP ---------------- */
-const map=L.map("map").setView(defaultView,defaultZoom);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap"}).addTo(map);
-const cluster=L.markerClusterGroup({maxClusterRadius:10,disableClusteringAtZoom:6});
+/* ── MAP ── */
+const map = L.map("map").setView(defaultView, defaultZoom);
+
+L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+const cluster = L.markerClusterGroup({ maxClusterRadius: 10, disableClusteringAtZoom: 6 });
 map.addLayer(cluster);
 
-/* ---------------- ICONS ---------------- */
-function getLogoSize(){const z=map.getZoom();if(z>=7)return 70;if(z>=6)return 50;if(z>=5)return 40;return 32;}
-function createClubIcon(logo){const size=getLogoSize();return L.divIcon({className:"",html:`<img src="${logo}" style="width:${size}px;height:${size}px;border-radius:50%">`});}
-function createEventIcon(logo,color){const size=getLogoSize(), ring=Math.max(3,size*0.08); return L.divIcon({className:"",html:`<img src="${logo}" style="width:${size}px;height:${size}px;border-radius:50%;border:${ring}px solid ${color}">`});}
-function createLeagueIcon(){return L.divIcon({className:"",html:`<div style="width:20px;height:20px;background:#66ccff;border-radius:50%;border:2px solid white"></div>`});}
-
-/* ---------------- HELPERS ---------------- */
-function getUpcomingEvents(clubName,n=3){
-  const today=new Date();
-  return events.filter(e=>e.club===clubName)
-    .map(e=>({date:new Date(e.date),raw:e}))
-    .filter(e=>e.date>=today)
-    .sort((a,b)=>a.date-b.date)
-    .slice(0,n)
-    .map(x=>x.raw);
+/* ── ICON HELPERS ── */
+function getLogoSize() {
+  const z = map.getZoom();
+  if (z >= 7) return 70;
+  if (z >= 6) return 50;
+  if (z >= 5) return 40;
+  return 32;
 }
 
-/* ---------------- MARKERS ---------------- */
-clubs.forEach(club=>{
-  const marker=L.marker([club.lat,club.lon],{icon:createClubIcon(club.logo)});
-  marker.club=club;
+function ringColor(event) {
+  if (!event) return null;
+  if (event.type === "practice")           return "#4ade80";
+  if (event.category === "club-metro")     return "#60a5fa";
+  if (event.category === "club-tournament")return "#818cf8";
+  if (event.category === "league-tournament") return "#f59e0b";
+  return "#60a5fa";
+}
 
-  marker.on("click",()=>{
-    selectedClub=club.name;
-    map.flyTo([club.lat,club.lon],7);
+function dotColor(category) {
+  if (category === "practice")          return "#4ade80";
+  if (category === "club-metro")        return "#60a5fa";
+  if (category === "club-tournament")   return "#818cf8";
+  if (category === "league-tournament") return "#f59e0b";
+  return "#60a5fa";
+}
+
+function createClubIcon(logo) {
+  const size = getLogoSize();
+  return L.divIcon({
+    className: "",
+    html: `<img src="${logo}" style="width:${size}px;height:${size}px;border-radius:50%;border:2px solid rgba(255,255,255,0.25);box-shadow:0 2px 8px rgba(0,0,0,0.5);">`,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2]
+  });
+}
+
+function createEventIcon(logo, color) {
+  const size = getLogoSize();
+  const ring = Math.max(3, size * 0.09);
+  return L.divIcon({
+    className: "",
+    html: `<img src="${logo}" style="width:${size}px;height:${size}px;border-radius:50%;border:${ring}px solid ${color};box-shadow:0 2px 12px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.08);">`,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2]
+  });
+}
+
+function createLeagueIcon() {
+  return L.divIcon({
+    className: "",
+    html: `<div style="width:22px;height:22px;background:#f59e0b;border-radius:50%;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.5);"></div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11]
+  });
+}
+
+/* ── HELPERS ── */
+function getUpcomingEvents(clubName, n = 3) {
+  const today = new Date();
+  return events
+    .filter(e => e.club === clubName)
+    .map(e => ({ date: new Date(e.date), raw: e }))
+    .filter(e => e.date >= today)
+    .sort((a, b) => a.date - b.date)
+    .slice(0, n)
+    .map(x => x.raw);
+}
+
+function formatEventType(e) {
+  if (e.type === "practice")                    return "Practice";
+  if (e.category === "club-metro")              return "Club Metro";
+  if (e.category === "club-tournament")         return "Club Tournament";
+  if (e.category === "league-tournament")       return "League Tournament";
+  return e.type;
+}
+
+/* ── MARKERS ── */
+clubs.forEach(club => {
+  const marker = L.marker([club.lat, club.lon], { icon: createClubIcon(club.logo) });
+  marker.club = club;
+
+  marker.on("click", () => {
+    selectedClub = club.name;
+    map.flyTo([club.lat, club.lon], 7);
     showClubEvents(club.name);
+    // Update active state in sidebar
+    document.querySelectorAll('.club').forEach(el => {
+      el.classList.toggle('active', el.dataset.club === club.name);
+    });
   });
 
-  marker.on("mouseover",()=>{
-    const next=getUpcomingEvents(club.name,1)[0];
-    const instagram=club.instagram?`<br><a href="https://www.instagram.com/${club.instagram.replace("@","")}/" target="_blank">${club.instagram}</a>`:"";
-    marker.bindTooltip(`<b>${club.name}</b>${instagram}`)
-    if(!next) return;
-    const typeLabel=next.type==="practice"?"Practice":next.category==="club-metro"?"Club Metro":"Club Tournament";
-    marker.bindTooltip(`<b>${club.name}</b>${instagram}<br>Next Event: ${next.date}<br>${typeLabel}`,{direction:"top",offset:[0,-10],opacity:0.9,sticky:true,className:"club-tooltip"}).openTooltip();
+  marker.on("mouseover", () => {
+    const next = getUpcomingEvents(club.name, 1)[0];
+    const ig = club.instagram
+      ? `<br><a href="https://www.instagram.com/${club.instagram.replace("@","")}/" target="_blank" style="color:#2563eb;text-decoration:none;">${club.instagram}</a>`
+      : "";
+    const nextStr = next
+      ? `<br><span style="color:rgba(30,40,60,0.45);font-size:11px;">Next: ${next.date} — ${formatEventType(next)}</span>`
+      : "";
+    marker.bindTooltip(
+      `<b style="color:rgba(30,40,60,0.9);">${club.name}</b>${ig}${nextStr}`,
+      { direction: "top", offset: [0, -10], opacity: 1, sticky: true, className: "club-tooltip" }
+    ).openTooltip();
   });
-  marker.on("mouseout",()=>marker.closeTooltip());
+
+  marker.on("mouseout", () => marker.closeTooltip());
 
   cluster.addLayer(marker);
-  clubMarkers[club.name]=marker;
+  clubMarkers[club.name] = marker;
 });
 
-
-/* ---------------- ZOOM ICON RESIZE ---------------- */
-map.on("zoomend",()=>{
-  Object.values(clubMarkers).forEach(m=>{
-    const next=getUpcomingEvents(m.club.name,1)[0];
-    const color=next?.type==="practice"?"#32cd32":next?.category==="club-tournament"?"#003366":"#66ccff";
-    m.setIcon((selectedClub===m.club.name && next) ? createEventIcon(m.club.logo,color) : createClubIcon(m.club.logo));
+/* ── ZOOM ICON RESIZE ── */
+map.on("zoomend", () => {
+  Object.values(clubMarkers).forEach(m => {
+    const next = getUpcomingEvents(m.club.name, 1)[0];
+    const color = ringColor(next);
+    m.setIcon(
+      (selectedClub === m.club.name && next)
+        ? createEventIcon(m.club.logo, color)
+        : createClubIcon(m.club.logo)
+    );
   });
 });
 
-/* ---------------- CALENDAR ---------------- */
-document.getElementById("datePicker").addEventListener("change",e=>showEventsForDate(e.target.value));
+/* ── CALENDAR ── */
+document.getElementById("datePicker").addEventListener("change", e => showEventsForDate(e.target.value));
 
-function showEventsForDate(date){
-  const list=document.getElementById("eventList");
-  list.innerHTML="<b>Events for "+date+"</b><br>";
-  if(leagueMarker){map.removeLayer(leagueMarker);leagueMarker=null;}
-  events.forEach(e=>{
-    if(e.date!==date) return;
-    let cls=e.type==="practice"?"eventPractice":e.category==="club-metro"?"eventGameMetro":e.category==="club-tournament"?"eventGameTournament":"eventGameTournament";
-    list.innerHTML+=`<div class="${cls}">${e.club} — ${e.type==="practice"?"Practice":e.category==="club-metro"?"Club Metro":e.category==="club-tournament"?"Club Tournament":"League Tournament"}</div>`;
-    if(e.category==="league-tournament"){
-      leagueMarker=L.marker([e.lat,e.lon],{icon:createLeagueIcon()}).addTo(map);
-      map.flyTo([e.lat,e.lon],5);
+function showEventsForDate(date) {
+  const list = document.getElementById("eventList");
+  if (leagueMarker) { map.removeLayer(leagueMarker); leagueMarker = null; }
+
+  const dayEvents = events.filter(e => e.date === date);
+
+  if (!dayEvents.length) {
+    list.innerHTML = `<b>No events on ${date}</b>`;
+    return;
+  }
+
+  list.innerHTML = `<b>${date}</b>`;
+  dayEvents.forEach(e => {
+    const color = dotColor(e.category);
+    const label = formatEventType(e);
+    const sub = e.subtitle ? ` — ${e.subtitle}` : "";
+    list.innerHTML += `<div class="event-row"><div class="event-dot" style="background:${color};"></div>${e.club} ${label}${sub}</div>`;
+
+    if (e.category === "league-tournament" && e.lat) {
+      leagueMarker = L.marker([e.lat, e.lon], { icon: createLeagueIcon() }).addTo(map);
+      map.flyTo([e.lat, e.lon], 5);
     }
   });
 }
 
-/* ---------------- CLUB EVENTS ---------------- */
-function showClubEvents(clubName){
-  const list=document.getElementById("eventList");
-  const eventsToShow=getUpcomingEvents(clubName,3);
-  list.innerHTML="<b>"+clubName+" upcoming events</b><br>";
-  eventsToShow.forEach(e=>{
-    const cls=e.type==="practice"?"eventPractice":e.category==="club-metro"?"eventGameMetro":e.category==="club-tournament"?"eventGameTournament":"eventGameTournament";
-    list.innerHTML+=`<div class="${cls}">${e.date} — ${e.type==="practice"?"Practice":e.category==="club-metro"?"Club Metro":e.category==="club-tournament"?"Club Tournament":"League Tournament"}</div>`;
+/* ── CLUB EVENTS ── */
+function showClubEvents(clubName) {
+  const list = document.getElementById("eventList");
+  const upcoming = getUpcomingEvents(clubName, 3);
+
+  list.innerHTML = `<b>${clubName}</b>`;
+
+  if (!upcoming.length) {
+    list.innerHTML += `<div class="event-row" style="color:rgba(255,255,255,0.35);">No upcoming events</div>`;
+    return;
+  }
+
+  upcoming.forEach(e => {
+    const color = dotColor(e.category);
+    const label = formatEventType(e);
+    list.innerHTML += `<div class="event-row"><div class="event-dot" style="background:${color};"></div>${e.date} — ${label}</div>`;
   });
 }
 
-/* ---------------- TICKER ---------------- */
-function buildTicker(){
-  const upcoming=events.filter(e=>e.type==="game").sort((a,b)=>new Date(a.date)-new Date(b.date));
-  const text=upcoming.map(e=>`${e.date} — ${e.club} ${e.category==="club-metro"?"Club Metro":e.category==="club-tournament"?"Club Tournament":"League Tournament"}`).join(" | ");
-  document.getElementById("tickerText").textContent=text;
+/* ── TICKER ── */
+function buildTicker() {
+  const today = new Date();
+  const upcoming = events
+    .filter(e => e.type === "game" && new Date(e.date) >= today)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+  const text = upcoming
+    .map(e => `${e.date} · ${e.club} ${formatEventType(e)}${e.subtitle ? " — " + e.subtitle : ""}`)
+    .join("   ·   ");
+  document.getElementById("tickerText").textContent = text + "   ·   " + text;
 }
 buildTicker();
 
-/* ---------------- SIDEBAR ---------------- */
-const clubList=document.getElementById("clubsContent");
-clubs.forEach(club=>{
-  const div=document.createElement("div");
-  div.className="club";
-  div.innerHTML=`<img src="${club.logo}">${club.name}`;
-  div.onclick=()=>{selectedClub=club.name; map.flyTo([club.lat,club.lon],7); showClubEvents(club.name);}
+/* ── SIDEBAR CLUBS LIST ── */
+const clubList = document.getElementById("clubsContent");
+clubs.forEach(club => {
+  const div = document.createElement("div");
+  div.className = "club";
+  div.dataset.club = club.name;
+  div.innerHTML = `<img src="${club.logo}" alt="${club.name}"><span class="club-name">${club.name}</span>`;
+  div.onclick = () => {
+    selectedClub = club.name;
+    map.flyTo([club.lat, club.lon], 7);
+    showClubEvents(club.name);
+    document.querySelectorAll('.club').forEach(el => {
+      el.classList.toggle('active', el.dataset.club === club.name);
+    });
+  };
   clubList.appendChild(div);
 });
 
-/* ---------------- SIDEBAR TOGGLE ---------------- */
-function toggle(id){
-  const clubsContent=document.getElementById("clubsContent");
-  const eventsContent=document.getElementById("eventsContent");
-  const eventsSidebar=document.querySelectorAll(".sidebar")[1];
-  if(id==="clubsContent"){
-    const isOpen=clubsContent.style.display==="block";
-    clubsContent.style.display=isOpen?"none":"block";
-    eventsSidebar.style.top=isOpen?"100px":(70+clubsContent.scrollHeight/3+10)+"px";
-    map.setView(defaultView,defaultZoom);
+/* ── SIDEBAR TOGGLE ── */
+function toggle(id) {
+  const clubsContent  = document.getElementById("clubsContent");
+  const eventsContent = document.getElementById("eventsContent");
+  const clubsHeader   = document.getElementById("clubsHeader");
+  const eventsHeader  = document.getElementById("eventsHeader");
+  const eventsSidebar = document.querySelectorAll(".sidebar")[1];
+
+  if (id === "clubsContent") {
+    const isOpen = clubsContent.style.display === "block";
+    clubsContent.style.display = isOpen ? "none" : "block";
+    clubsHeader.classList.toggle("open", !isOpen);
+    if (isOpen) {
+      map.setView(defaultView, defaultZoom);
+      eventsSidebar.style.top = "108px";
+    } else {
+      const h = Math.min(clubsContent.scrollHeight, 280);
+      eventsSidebar.style.top = (62 + 40 + h + 8) + "px";
+    }
   }
-  if(id==="eventsContent"){
-    const isOpen=eventsContent.style.display==="block";
-    eventsContent.style.display=isOpen?"none":"block";
-    if(!isOpen){ clubsContent.style.display="none"; eventsSidebar.style.top="100px"; }
+
+  if (id === "eventsContent") {
+    const isOpen = eventsContent.style.display === "block";
+    eventsContent.style.display = isOpen ? "none" : "block";
+    eventsHeader.classList.toggle("open", !isOpen);
+    if (!isOpen) {
+      clubsContent.style.display = "none";
+      clubsHeader.classList.remove("open");
+      eventsSidebar.style.top = "108px";
+    }
   }
 }
 </script>
