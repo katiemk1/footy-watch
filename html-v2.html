@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>USAFL Women's Footy Map</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+
+<style>
+body{margin:0;font-family:Arial}
+#map{height:100vh}
+
+/* Transparent ticker */
+#ticker{
+  position:absolute;
+  top:8px;
+  left:80px;
+  right:20px;
+  background:rgba(11,102,178,0.85);
+  color:white;
+  padding:12px 20px;
+  font-weight:bold;
+  z-index:900;
+  white-space:nowrap;
+  overflow:hidden;
+  border-radius:8px;
+  backdrop-filter:blur(4px);
+}
+#ticker span{
+  display:inline-block;
+  padding-left:100%;
+  animation:scroll 30s linear infinite
+}
+@keyframes scroll{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-100%)}
+}
+
+/* Sidebars */
+.sidebar{
+  position:absolute;
+  right:10px;
+  width:270px;
+  background:white;
+  border-radius:10px;
+  box-shadow:0 6px 18px rgba(0,0,0,.2);
+  overflow:hidden;
+  z-index:1000;
+  transition:top .25s ease;
+}
+.header{
+  background:#0b66b2;
+  color:white;
+  padding:8px;
+  font-weight:bold;
+  cursor:pointer
+}
+.content{
+  display:none;
+  max-height:320px;
+  overflow:auto;
+  padding:8px
+}
+
+/* Club cards */
+.club{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px;
+  cursor:pointer
+}
+.club img{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+}
+
+/* Event buttons */
+.controls button{
+  margin:3px;
+  padding:6px 8px;
+  border:none;
+  background:#eee;
+  cursor:pointer
+}
+.controls button.active{
+  background:#0b66b2;
+  color:white
+}
+
+#calendar{
+  position:absolute;
+  bottom:12px;
+  right:12px;
+  background:white;
+  padding:10px;
+  border-radius:8px;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+  z-index:1000
+}
+#eventList{
+  margin-top:8px;
+  font-size:13px
+}
+
+/* Event types */
+.eventGameMetro{color:#66ccff}
+.eventGameTournament{color:#003366}
+.eventPractice{color:#32cd32}
+</style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<div id="ticker"><span id="tickerText">Loading events...</span></div>
+
+<div class="sidebar" style="top:60px">
+  <div class="header" onclick="toggle('clubsContent')">Women's Football Teams</div>
+  <div class="content" id="clubsContent"></div>
+</div>
+
+<div class="sidebar" style="top:100px">
+  <div class="header" onclick="toggle('eventsContent')">Events</div>
+  <div class="content" id="eventsContent">
+    <div class="controls">
+      <!-- <button id="allBtn" class="active" onclick="setFilter('all')">All</button>
+      <button id="gameBtn" onclick="setFilter('game')">Game</button>
+      <button id="practiceBtn" onclick="setFilter('practice')">Practice</button> -->
+      <div style="margin-top:0px;font-size:13px">
+        <!-- <b>Legend</b> -->
+        <div><span style="color:#66ccff">●</span> Club Metro</div>
+        <div><span style="color:#003366">●</span> Club Tournament</div>
+        <div><span style="color:#32cd32">●</span> Practice</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="calendar">
+  <input type="date" id="datePicker">
+  <div id="eventList"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<script>
+/* ---------------- DATA ---------------- */
+const clubs = [
+{ name:"Arizona Lady Hawks", lat:33.4484, lon:-112.074, instagram:"@azhawks", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/AZHawks-1-768x681.png"},
+{ name:"Atlanta Kookaburas", lat:33.749, lon:-84.388, instagram:"@atlkookaburras", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/AtlantaKookaburras2012-1-768x606.png"},
+{ name:"Austin Crows", lat:30.2672, lon:-97.7431, instagram:"@austincrows", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Austin-Crows-shield-logo-1-768x538.png"},
+{ name:"Baton Rouge Tigers", lat:30.4515, lon:-91.1871, instagram:"@brfooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/BRT_Tiger20Head-2-e1721771864128.png"},
+{ name:"Bayou Brawlers", lat:29.9511, lon:-90.0715, instagram:"@bayou.brawlers.arfc", logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/Bayou20Brawlers2028229.png"},
+{ name:"Boston Demons", lat:42.36, lon:-71.06, instagram:"@boston_demons", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Boston_logo-1-768x841.png"},
+{ name:"Chicago Swans", lat:41.8781, lon:-87.6298, instagram:"@chicagofooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/cafa_logo_300x400-1-3.png"},
+{ name:"Cincinnati Dockers", lat:39.1031, lon:-84.512, instagram:"@cincinattidockers", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Cincinnati-Dockers-400w-2.png"},
+{ name:"Columbus Cats", lat:39.9612, lon:-82.9988, instagram:"@columbusfooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/ColumbusCats-3.png"},
+{ name:"DC Eagles", lat:38.88639255, lon:-77.04867424, instagram:"@dceaglesfc", logo:"https://aussierulesusa.com/wp-content/uploads/2025/02/dc-eagles.png"},
+{ name:"Denver Bulldogs", lat:39.7392, lon:-104.9903, instagram:"@denverbulldogsfooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Denver-768x666.png"},
+{ name:"Golden Gate", lat:37.7749, lon:-122.4194, instagram:"@ggafl", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/GGAFL_gradient-768x781.png"},
+{ name:"Hawai'i Eagles", lat:21.3069, lon:-157.8583, instagram:"@hawaiieagles", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/HawaiiLogoNew2-1.png"},
+{ name:"Houston Lonestars", lat:29.7604, lon:-95.3698, instagram:"@houston_lonestars", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/HoustonSq2.png"},
+{ name:"Minnesota Freeze", lat:44.9778, lon:-93.3, instagram:"@mnfreezefooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Freeze-logo-400w.png"},
+{ name:"New York Magpies", lat:40.7128, lon:-74.006, instagram:"@newyorkmagpies", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/NYMagpiesBW.png"},
+{ name:"North Star Blue Ox", lat:44.95, lon:-93.09, instagram:"@northstarblueoxfootyclub", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/BlueOxLogoCropped.png"},
+{ name:"North Texas Devils", lat:33.0198, lon:-96.6989, instagram:"@ntxdevilswomen", logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/NTX-Devils-Logo-full-RGB.jpg"},
+{ name:"Orange County Giants", lat:33.6846, lon:-117.8265, instagram:"@ocgiants", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/OCSquare.png"},
+{ name:"Philadelphia Hawks", lat:39.9526, lon:-75.1652, instagram:"@phillyhawks", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/PhillyHawks-2013.png"},
+{ name:"Portland Sockeyes", lat:45.461745, lon:-122.679117, instagram:"@portland_afc", 
+logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/pafc.club_.transparent-768x768.png"},
+{ name:"Sacramento Suns", lat:38.5816, lon:-121.4944, instagram:"@sacfooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/SacramentoSuns_0.png"},
+{ name:"Saint Louis Australian Football Club", lat:38.627, lon:-90.1994, instagram:"@stlaustralianfootball", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/STL20Logo202022-1-768x768.jpeg"},
+{ name:"Seattle Grizzlies", lat:47.6062, lon:-122.3321, instagram:"@seattlegrizzlies", logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/seattle_grizzlies-1-768x792.png"},
+{ name:"Virginia Lions", lat:37.5407, lon:-77.436, instagram:"@vafooty", logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/virginia_lions_square_0-1-768x994.png"},
+{ name:"Wasatch WarGulls", lat:40.7608, lon:-111.891, instagram:"@wasatchwargulls", logo:"https://aussierulesusa.com/wp-content/uploads/2025/03/image0.png"}
+]
+
+const events=[
+
+{club:"Arizona Lady Hawks",date:"2026-04-12",type:"game",category:"club-metro"},
+{club:"Arizona Lady Hawks",date:"2026-04-20",type:"practice"},
+{club:"Austin Crows",date:"2026-04-18",type:"game",category:"club-tournament"},
+{club:"Chicago Swans",date:"2026-04-14",type:"practice"}
+
+]
+
+/* ---------------- STATE ---------------- */
+let selectedClub=null, filter="all";
+const clubMarkers={};
+const defaultView=[39,-96], defaultZoom=4;
+
+/* ---------------- MAP ---------------- */
+const map=L.map("map").setView(defaultView,defaultZoom);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap"}).addTo(map);
+const cluster=L.markerClusterGroup({maxClusterRadius:10,disableClusteringAtZoom:6});
+map.addLayer(cluster);
+
+/* ---------------- ICONS ---------------- */
+function getLogoSize(){
+  const z=map.getZoom();
+  if(z>=7)return 70;
+  if(z>=6)return 50;
+  if(z>=5)return 40;
+  return 32;
+}
+function createClubIcon(logo){
+  const size=getLogoSize();
+  return L.divIcon({className:"",html:`<img src="${logo}" style="width:${size}px;height:${size}px;border-radius:50%">`});
+}
+function createEventIcon(logo,color){
+  const size=getLogoSize(), ring=Math.max(3,size*0.08);
+  return L.divIcon({
+    className:"",
+    html:`<img src="${logo}" style="width:${size}px;height:${size}px;border-radius:50%;border:${ring}px solid ${color}">`
+  });
+}
+
+/* ---------------- HELPER ---------------- */
+function determineColor(clubName){
+  const ev=events.find(e=>e.club===clubName && (filter==="all"||e.type===filter));
+  if(!ev) return "#66ccff";
+  if(ev.type==="practice") return "#32cd32";
+  if(ev.category==="club-tournament") return "#003366";
+  return "#66ccff";
+}
+
+function getNextEvent(clubName){
+  const today=new Date();
+  const next=events.filter(e=>e.club===clubName)
+    .map(e=>({date:new Date(e.date),raw:e}))
+    .filter(e=>e.date>=today)
+    .sort((a,b)=>a.date-b.date)[0];
+  if(!next) return {date:"None",type:"-",category:""};
+  return {date:next.raw.date,type:next.raw.type,category:next.raw.category};
+}
+
+/* ---------------- MARKERS ---------------- */
+clubs.forEach(club=>{
+  const marker=L.marker([club.lat,club.lon],{icon:createClubIcon(club.logo)});
+  marker.club=club;
+
+  // Click marker
+  marker.on("click",()=>selectClub(club));
+
+  // Hover tooltip with Instagram link
+  marker.on("mouseover",()=>{
+    const next=getNextEvent(club.name);
+    let typeLabel="";
+    if(next.type==="practice") typeLabel="Practice";
+    else if(next.category==="club-metro") typeLabel="Club Metro";
+    else if(next.category==="club-tournament") typeLabel="Club Tournament";
+    else typeLabel=next.type;
+
+    marker.bindTooltip(`
+      <b>${club.name}</b><br>
+      <a href="https://www.instagram.com/${club.instagram}/" target="_blank">${club.instagram}</a><br>
+      Next Event: ${next.date}<br>
+      ${typeLabel}
+    `,{direction:"top",offset:[0,-10],opacity:0.9,sticky:true}).openTooltip();
+  });
+  marker.on("mouseout",()=>marker.closeTooltip());
+
+  cluster.addLayer(marker);
+  clubMarkers[club.name]=marker;
+});
+
+/* ---------------- ZOOM RESIZE ---------------- */
+map.on("zoomend",()=>{
+  Object.values(clubMarkers).forEach(m=>{
+    const next=getNextEvent(m.club.name);
+    const color=next.type==="practice"?"#32cd32":next.category==="club-tournament"?"#003366":"#66ccff";
+    const icon=(selectedClub===m.club.name && next.date!=="None") ? createEventIcon(m.club.logo,color) : createClubIcon(m.club.logo);
+    m.setIcon(icon);
+  });
+  updateEvents(document.getElementById("datePicker").value);
+});
+
+/* ---------------- CLUB SELECT ---------------- */
+function selectClub(club){
+  selectedClub=club.name;
+  map.flyTo([club.lat,club.lon],7);
+  showClubEvents(club.name);
+  jumpToClubNextEvent(club.name);
+}
+
+function deselectClub(){
+  selectedClub=null;
+  document.getElementById("eventList").innerHTML="";
+}
+
+/* ---------------- CLUB SIDEBAR ---------------- */
+const clubList=document.getElementById("clubsContent");
+clubs.forEach(club=>{
+  const div=document.createElement("div");
+  div.className="club";
+  div.innerHTML=`<img src="${club.logo}">${club.name}`;
+  div.onclick=()=>selectClub(club);
+  clubList.appendChild(div);
+});
+
+/* ---------------- EVENTS ---------------- */
+document.getElementById("datePicker").addEventListener("change",e=>updateEvents(e.target.value));
+
+function updateEvents(date){
+  Object.values(clubMarkers).forEach(marker=>{
+    const club=marker.club;
+    const ev=events.find(e=>e.club===club.name && (!date||e.date===date) && (filter==="all"||e.type===filter));
+    if(!ev){marker.setIcon(createClubIcon(club.logo)); return;}
+    let color=determineColor(club.name);
+    marker.setIcon(createEventIcon(club.logo,color));
+  });
+}
+
+/* ---------------- NEXT EVENTS ---------------- */
+function jumpToNextGame(){
+  const today=new Date();
+  const next=events.filter(e=>e.type==="game").map(e=>({date:new Date(e.date),raw:e})).filter(e=>e.date>=today).sort((a,b)=>a.date-b.date)[0];
+  if(!next) return;
+  document.getElementById("datePicker").value=next.raw.date;
+  updateEvents(next.raw.date);
+}
+
+function jumpToClubNextEvent(clubName){
+  const today=new Date();
+  const next=events.filter(e=>e.club===clubName).map(e=>({date:new Date(e.date),raw:e})).filter(e=>e.date>=today).sort((a,b)=>a.date-b.date)[0];
+  if(!next) return;
+  document.getElementById("datePicker").value=next.raw.date;
+  updateEvents(next.raw.date);
+}
+
+/* ---------------- CLUB EVENTS LIST ---------------- */
+function showClubEvents(clubName){
+  const list=document.getElementById("eventList");
+  const clubEvents=events.filter(e=>e.club===clubName);
+  list.innerHTML="<b>"+clubName+" events</b><br>";
+  clubEvents.forEach(e=>{
+    let cls="eventGameMetro";
+    if(e.type==="practice") cls="eventPractice";
+    if(e.category==="club-tournament") cls="eventGameTournament";
+    list.innerHTML+=`<div class="${cls}">${e.date} — ${e.type==="practice"?"Practice":e.category==="club-metro"?"Club Metro":"Club Tournament"}</div>`;
+  });
+}
+
+/* ---------------- TICKER ---------------- */
+function buildTicker(){
+  const upcoming=events.filter(e=>e.type==="game").sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const text=upcoming.map(e=>`${e.date} — ${e.club}`).join(" | ");
+  document.getElementById("tickerText").textContent=text;
+}
+buildTicker();
+
+/* ---------------- SIDEBAR TOGGLE ---------------- */
+const clubsContent=document.getElementById("clubsContent");
+const eventsContent=document.getElementById("eventsContent");
+
+function toggle(id){
+
+  const clubsContent = document.getElementById("clubsContent");
+  const eventsContent = document.getElementById("eventsContent");
+  const eventsSidebar = document.querySelectorAll(".sidebar")[1];
+
+  if(id === "clubsContent"){
+
+    const isOpen = clubsContent.style.display === "block";
+
+    if(isOpen){
+      clubsContent.style.display = "none";
+      // reset events sidebar position
+      eventsSidebar.style.top = "100px";
+      map.setView(defaultView, defaultZoom);
+    } else {
+      clubsContent.style.display = "block";
+      const height = clubsContent.scrollHeight;
+      // drop the events sidebar just below the expanded clubs list
+      eventsSidebar.style.top = (70+height/3+10) + "px";
+      map.setView(defaultView, defaultZoom);
+    }
+
+  }
+
+  if(id === "eventsContent"){
+
+    const isOpen = eventsContent.style.display === "block";
+
+    if(isOpen){
+      eventsContent.style.display = "none";
+    } else {
+      eventsContent.style.display = "block";
+      // optionally collapse clubs list
+      clubsContent.style.display = "none";
+      eventsSidebar.style.top = "100px";
+      deselectClub();
+      jumpToNextGame();
+      map.setView(defaultView, defaultZoom);
+    }
+
+  }
+
+}
+</script>
+</body>
+</html>
