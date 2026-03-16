@@ -28,8 +28,8 @@ body {
   top: 12px;
   left: 56px;
   right: 12px;
-  height: 38px;
-  background: rgba(135, 206, 250,0.82);
+  height: 60px;
+  background: rgba(135, 206, 250,0.6);
   border: 0.5px solid rgba(0,0,0,0.1);
   border-radius: 8px;
   backdrop-filter: blur(14px);
@@ -41,8 +41,8 @@ body {
 }
 
 #ticker-badge {
-  background: #2563eb;
-  color: white;
+  background: rgba(135, 206, 250,1);
+  color: rgba(40,50,70,1);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -52,16 +52,19 @@ body {
   margin: 0 12px;
   white-space: nowrap;
   flex-shrink: 0;
+  z-index: 2;
 }
 
 #tickerText {
   font-family: 'DM Mono', monospace;
-  font-size: 12px;
+  font-size: 16px;
   color: rgba(40,50,70,1);
   white-space: nowrap;
   display: inline-block;
   padding-left: 100%;
   animation: scroll 160s linear infinite;
+  position: relative;
+  z-index: 1;
 }
 
 /* slower ticker on phones */
@@ -102,6 +105,7 @@ body {
   height: 20px;
   margin-right: 8px;
   flex-shrink: 0;
+  transform: rotate(-20deg);
 }
 
 .header {
@@ -438,7 +442,7 @@ body {
 
 <!-- Teams sidebar -->
     
-<div class="sidebar" style="top:62px">
+<div class="sidebar" style="top:80px">
 
   <div class="header" id="clubsHeader" onclick="toggle('clubsContent')">
 
@@ -458,8 +462,8 @@ body {
 
 
 <!-- Events sidebar -->
-<div class="sidebar" style="top:108px">
-  <div class="header" id="eventsHeader" onclick="toggle('eventsContent')">📅<span class="label">Events</span></div>
+<div class="sidebar" style="top:128px">
+  <div class="header" id="eventsHeader" onclick="toggle('eventsContent')"><span class="sidebar-icon">📅</span><span class="label">Events</span></div>
   <div class="content" id="eventsContent">
     <div style="padding: 6px 0 2px;">
       <div class="legend-row"><div class="legend-dot" style="background:#60a5fa;"></div> Club Metro</div>
