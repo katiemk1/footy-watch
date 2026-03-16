@@ -24,7 +24,7 @@ body {
 
 /* ── Ticker ── */
 #ticker {
-  position: absolute;
+  position: fixed;
   top: 12px;
   left: 56px;
   right: 12px;
@@ -85,6 +85,10 @@ body {
   to   { transform: translateX(-50%); }
 }
 
+:root{
+  --ticker-height:60px;
+}
+    
 /* ── Sidebars ── */
 .sidebar {
   position: absolute;
@@ -106,6 +110,14 @@ body {
   margin-right: 8px;
   flex-shrink: 0;
   transform: rotate(-20deg);
+}
+
+.sidebar:nth-of-type(1){
+  top: calc(var(--ticker-height) + 30px);
+}
+
+.sidebar:nth-of-type(2){
+  top: calc(var(--ticker-height) + 80px);
 }
 
 .header {
@@ -232,6 +244,11 @@ body {
   text-transform: uppercase;
   color: rgba(30,40,60,0.35);
   margin-bottom: 8px;
+}
+
+.calendar-icon{
+  font-size:20px;
+  line-height:1;
 }
 
 #datePicker {
@@ -386,7 +403,7 @@ body {
     border-radius: 12px;
   }
 
-  .sidebar:nth-of-type(1) {
+  /* .sidebar:nth-of-type(1) {
     top: 60px;
     right: 10px;
   }
@@ -394,6 +411,14 @@ body {
   .sidebar:nth-of-type(2) {
     top: 120px;
     right: 10px;
+  } */
+
+  .sidebar:nth-of-type(1) {
+    top: calc(var(--ticker-height) + 10px);
+  }
+
+  .sidebar:nth-of-type(2) {
+    top: calc(var(--ticker-height) + 70px);
   }
 
   .sidebar-icon {
@@ -426,6 +451,18 @@ body {
     display: block;
   }
 
+}
+
+/* map emphasis when filtering by date */
+.marker-active img{
+  transform:scale(1.15);
+  transition:all .2s ease;
+}
+
+.marker-faded img{
+  opacity:0.35;
+  transform:scale(0.75);
+  transition:all .2s ease;
 }
 
 </style>
@@ -463,7 +500,7 @@ body {
 
 <!-- Events sidebar -->
 <div class="sidebar" style="top:128px">
-  <div class="header" id="eventsHeader" onclick="toggle('eventsContent')"><span class="sidebar-icon">📅</span><span class="label">Events</span></div>
+  <div class="header" id="eventsHeader" onclick="toggle('eventsContent')"><span class="sidebar-icon calendar-icon">📅</span><span class="label">Events</span></div>
   <div class="content" id="eventsContent">
     <div style="padding: 6px 0 2px;">
       <div class="legend-row"><div class="legend-dot" style="background:#60a5fa;"></div> Club Metro</div>
@@ -568,7 +605,24 @@ const events = [
   {club:"DC Eagles",       date:"2026-10-13", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
   {club:"USAFL",           date:"2026-10-17", type:"game",      category:"league-tournament", lat:28.5383, lon:-81.3792, subtitle:"Nationals — Orlando"}
 ];
+// /* ── BUILD SUBTITLE ── */ 
+// function buildSubtitle(e){
 
+//   let label = "";
+
+//   if (e.subtitle) {
+//     label += e.subtitle;
+//   }
+
+//   if (e.time) {
+//     if (label !== "") label += " • ";
+//     label += e.time;
+//   }
+
+//   return label || null;
+
+// }
+    
 /* ── STATE ── */
 let selectedClub = null;
 const clubMarkers = {};
@@ -676,15 +730,40 @@ clubs.forEach(club => {
   const marker = L.marker([club.lat, club.lon], { icon: createClubIcon(club.logo) });
   marker.club = club;
 
+  // marker.on("click", () => {
+  //   selectedClub = club.name;
+  //   map.flyTo([club.lat, club.lon], 7);
+  //   showClubEvents(club.name);
+  //   // Update active state in sidebar
+  //   document.querySelectorAll('.club').forEach(el => {
+  //     el.classList.toggle('active', el.dataset.club === club.name);
+  //   });
+  // });
   marker.on("click", () => {
+
     selectedClub = club.name;
+
     map.flyTo([club.lat, club.lon], 7);
+
     showClubEvents(club.name);
-    // Update active state in sidebar
-    document.querySelectorAll('.club').forEach(el => {
-      el.classList.toggle('active', el.dataset.club === club.name);
-    });
-  });
+
+    /* open calendar sidebar */
+    document.getElementById("eventsContent").style.display = "block";
+    document.getElementById("eventsHeader").classList.add("open");
+
+    highlightCalendarForClub(club.name);
+
+    /* keep popup visible with clickable IG */
+    const ig = club.instagram
+      ? `<a href="https://www.instagram.com/${club.instagram.replace("@","")}/" target="_blank">${club.instagram}</a>`
+      : "";
+
+    marker.bindPopup(`
+      <b>${club.name}</b><br>
+      ${ig}
+    `).openPopup();
+
+  });  
 
   marker.on("mouseover", () => {
     const next = getUpcomingEvents(club.name, 1)[0];
@@ -729,11 +808,21 @@ function showEventsForDate(date) {
     map.removeLayer(leagueMarker);
     leagueMarker = null;
   }
-
-  /* reset all club icons */
   Object.values(clubMarkers).forEach(marker => {
-    marker.setIcon(createClubIcon(marker.club.logo));
-  });
+
+  const el = marker.getElement();
+  if(el){
+    el.classList.remove("marker-active","marker-faded");
+  }
+
+  marker.setIcon(createClubIcon(marker.club.logo));
+
+});
+
+  // /* reset all club icons */
+  // Object.values(clubMarkers).forEach(marker => {
+  //   marker.setIcon(createClubIcon(marker.club.logo));
+  // });
 
   const dayEvents = events.filter(e => e.date === date);
 
@@ -771,9 +860,41 @@ function showEventsForDate(date) {
       map.flyTo([e.lat, e.lon], 5);
     }
 
+    /* emphasize markers */
+    Object.values(clubMarkers).forEach(m=>{
+      const el = m.getElement();
+      if(!el) return;
+    
+      if(dayEvents.some(ev => ev.club === m.club.name)){
+        el.classList.add("marker-active");
+      } else {
+        el.classList.add("marker-faded");
+      }
+    });
+
   });
 }
 
+function highlightCalendarForClub(clubName){
+
+  const picker = document.getElementById("datePicker");
+
+  const clubEvents = events.filter(e => e.club === clubName);
+
+  if(!clubEvents.length) return;
+
+  /* highlight next event date */
+  const next = clubEvents
+    .map(e => new Date(e.date))
+    .filter(d => d >= new Date())
+    .sort((a,b)=>a-b)[0];
+
+  if(next){
+    picker.value = next.toISOString().split("T")[0];
+    showEventsForDate(picker.value);
+  }
+
+}
 /* ── CLUB EVENTS ── */
 function showClubEvents(clubName) {
   const list = document.getElementById("eventList");
@@ -793,6 +914,20 @@ function showClubEvents(clubName) {
   });
 }
 
+function buildEventSubtitle(e){
+
+  if (e.subtitle && e.time) {
+    return `${e.subtitle} • ${e.time}`;
+  }
+
+  if (e.subtitle) return e.subtitle;
+
+  if (e.time) return e.time;
+
+  return "";
+
+}
+
 /* ── TICKER ── */
 function buildTicker() {
   const today = new Date();
@@ -800,8 +935,8 @@ function buildTicker() {
     .filter(e => e.type === "game" && new Date(e.date) >= today)
     .sort((a, b) => new Date(a.date) - new Date(b.date));
   const text = upcoming
-    .map(e => `${e.date} · ${e.club} ${formatEventType(e)}${e.subtitle ? " — " + e.subtitle : ""}`)
-    .join("   ·   ");
+    .map(e => `${new Date(e.date + "T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"})} · ${e.club} ${formatEventType(e)}${e.subtitle ? " — " + e.subtitle : ""}`)
+    .join("   |   ");
   document.getElementById("tickerText").textContent = text + "   ·   " + text;
 }
 buildTicker();
