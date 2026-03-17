@@ -525,103 +525,126 @@ body {
 <script>
 /* ── DATA ── */
 const clubs = [
-  { name:"Arizona Lady Hawks",    lat:33.4484,  lon:-112.074,   instagram:"@azhawks",                    logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/AZHawks-1-768x681.png"},
-  { name:"Atlanta Kookaburas",    lat:33.749,   lon:-84.388,    instagram:"@atlkookaburras",             logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/AtlantaKookaburras2012-1-768x606.png"},
-  { name:"Austin Crows",          lat:30.2672,  lon:-97.7431,   instagram:"@austincrows",                logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Austin-Crows-shield-logo-1-768x538.png"},
-  { name:"Baton Rouge Tigers",    lat:30.4515,  lon:-91.1871,   instagram:"@brfooty",                   logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/BRT_Tiger20Head-2-e1721771864128.png"},
-  { name:"Bayou Brawlers",        lat:29.9511,  lon:-90.0715,   instagram:"@bayou.brawlers.arfc",       logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/Bayou20Brawlers2028229.png"},
-  { name:"Boston Demons",         lat:42.36,    lon:-71.06,     instagram:"@boston_demons",              logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Boston_logo-1-768x841.png"},
-  { name:"Chicago Swans",         lat:41.8781,  lon:-87.6298,   instagram:"@chicagofooty",              logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/cafa_logo_300x400-1-3.png"},
-  { name:"Cincinnati Dockers",    lat:39.1031,  lon:-84.512,    instagram:"@cincinattidockers",         logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Cincinnati-Dockers-400w-2.png"},
-  { name:"Columbus Cats",         lat:39.9612,  lon:-82.9988,   instagram:"@columbusfooty",             logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/ColumbusCats-3.png"},
-  { name:"DC Eagles",             lat:38.88639, lon:-77.04867,  instagram:"@dceaglesfc",                logo:"https://aussierulesusa.com/wp-content/uploads/2025/02/dc-eagles.png"},
-  { name:"Denver Bulldogs",       lat:39.7392,  lon:-104.9903,  instagram:"@denverbulldogsfooty",       logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Denver-768x666.png"},
-  { name:"Golden Gate",           lat:37.7749,  lon:-122.4194,  instagram:"@ggafl",                     logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/GGAFL_gradient-768x781.png"},
-  { name:"Hawai'i Eagles",        lat:21.3069,  lon:-157.8583,  instagram:"@hawaiieagles",              logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/HawaiiLogoNew2-1.png"},
-  { name:"Houston Lonestars",     lat:29.7604,  lon:-95.3698,   instagram:"@houston_lonestars",         logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/HoustonSq2.png"},
-  { name:"Minnesota Freeze",      lat:44.9778,  lon:-93.3,      instagram:"@mnfreezefooty",             logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Freeze-logo-400w.png"},
-  { name:"New York Magpies",      lat:40.7128,  lon:-74.006,    instagram:"@newyorkmagpies",            logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/NYMagpiesBW.png"},
-  { name:"North Star Blue Ox",    lat:44.95,    lon:-93.09,     instagram:"@northstarblueoxfootyclub",  logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/BlueOxLogoCropped.png"},
-  { name:"North Texas Devils",    lat:33.0198,  lon:-96.6989,   instagram:"@ntxdevilswomen",            logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/NTX-Devils-Logo-full-RGB.jpg"},
-  { name:"Orange County Giants",  lat:33.6846,  lon:-117.8265,  instagram:"@ocgiants",                  logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/OCSquare.png"},
-  { name:"Philadelphia Hawks",    lat:39.9526,  lon:-75.1652,   instagram:"@phillyhawks",               logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/PhillyHawks-2013.png"},
-  { name:"Portland Sockeyes",     lat:45.461745,lon:-122.679117,instagram:"@portland_afc",              logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/pafc.club_.transparent-768x768.png"},
-  { name:"Sacramento Suns",       lat:38.5816,  lon:-121.4944,  instagram:"@sacfooty",                  logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/SacramentoSuns_0.png"},
-  { name:"Saint Louis AFC",       lat:38.627,   lon:-90.1994,   instagram:"@stlaustralianfootball",     logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/STL20Logo202022-1-768x768.jpeg"},
-  { name:"Seattle Grizzlies",     lat:47.6062,  lon:-122.3321,  instagram:"@seattlegrizzlies",          logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/seattle_grizzlies-1-768x792.png"},
-  { name:"Virginia Lions",        lat:37.5407,  lon:-77.436,    instagram:"@vafooty",                   logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/virginia_lions_square_0-1-768x994.png"},
-  { name:"Wasatch WarGulls",      lat:40.7608,  lon:-111.891,   instagram:"@wasatchwargulls",           logo:"https://aussierulesusa.com/wp-content/uploads/2025/03/image0.png"}
+
+{name:"Arizona Lady Hawks",lat:33.4484,lon:-112.074,instagram:"@azhawks",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/AZHawks-1-768x681.png"},
+
+{name:"Atlanta Kookaburras",lat:33.749,lon:-84.388,instagram:"@atlkookaburras",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/AtlantaKookaburras2012-1-768x606.png"},
+
+{name:"Austin Crows",lat:30.2672,lon:-97.7431,instagram:"@austincrows",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Austin-Crows-shield-logo-1-768x538.png"},
+
+{name:"Baton Rouge Tigers",lat:30.4515,lon:-91.1871,instagram:"@brfooty",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/BRT_Tiger20Head-2-e1721771864128.png"},
+
+{name:"Bayou Brawlers",lat:29.9511,lon:-90.0715,instagram:"@bayou.brawlers.arfc",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/Bayou20Brawlers2028229.png"},
+
+{name:"Boston Demons",lat:42.36,lon:-71.06,instagram:"@boston_demons",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Boston_logo-1-768x841.png"},
+
+{name:"Chicago Swans",lat:41.8781,lon:-87.6298,instagram:"@chicagofooty",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/cafa_logo_300x400-1-3.png"},
+
+{name:"Cincinnati Dockers",lat:39.1031,lon:-84.512,instagram:"@cincinattidockers",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Cincinnati-Dockers-400w-2.png"},
+
+{name:"Columbus Cats",lat:39.9612,lon:-82.9988,instagram:"@columbusfooty",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/ColumbusCats-3.png"},
+
+{name:"DC Eagles",lat:38.88639255,lon:-77.04867424,instagram:"@dceagles",email:"womens@dceaglesfc.com",website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2025/02/dc-eagles.png"},
+
+{name:"Denver Bulldogs",lat:39.7392,lon:-104.9903,instagram:"@denverbulldogsfooty",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Denver-768x666.png"},
+
+{name:"Golden Gate",lat:37.7749,lon:-122.4194,instagram:"@ggafl",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/GGAFL_gradient-768x781.png"},
+
+{name:"Hawai'i Eagles",lat:21.3069,lon:-157.8583,instagram:"@hawaiieagles",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/HawaiiLogoNew2-1.png"},
+
+{name:"Houston Lonestars",lat:29.7604,lon:-95.3698,instagram:"@houston_lonestars",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/HoustonSq2.png"},
+
+{name:"Minnesota Freeze",lat:44.9778,lon:-93.3,instagram:"@mnfreezefooty",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Freeze-logo-400w.png"},
+
+{name:"New York Magpies",lat:40.7128,lon:-74.006,instagram:"@newyorkmagpies",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/NYMagpiesBW.png"},
+
+{name:"North Star Blue Ox",lat:44.95,lon:-93.09,instagram:"@northstarblueoxfootyclub",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/BlueOxLogoCropped.png"},
+
+{name:"North Texas Devils",lat:33.0198,lon:-96.6989,instagram:"@ntxdevilswomen",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/NTX-Devils-Logo-full-RGB.jpg"},
+
+{name:"Orange County Giants",lat:33.6846,lon:-117.8265,instagram:"@ocgiants",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/OCSquare.png"},
+
+{name:"Philadelphia Hawks",lat:39.9526,lon:-75.1652,instagram:"@phillyhawks",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/PhillyHawks-2013.png"},
+
+{name:"Portland Sockeyes",lat:45.5152,lon:-122.6784,instagram:"@portland_afc",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/pafc.club_.transparent-768x768.png"},
+
+{name:"Sacramento Suns",lat:38.5816,lon:-121.4944,instagram:"@sacfooty",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/SacramentoSuns_0.png"},
+
+{name:"Saint Louis Australian Football Club",lat:38.627,lon:-90.1994,instagram:"@stlaustralianfootball",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/STL20Logo202022-1-768x768.jpeg"},
+
+{name:"Seattle Grizzlies",lat:47.6062,lon:-122.3321,instagram:"@seattlegrizzlies",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/seattle_grizzlies-1-768x792.png"},
+
+{name:"Virginia Lions",lat:37.5407,lon:-77.436,instagram:"@vafooty",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/06/virginia_lions_square_0-1-768x994.png"},
+
+{name:"Wasatch WarGulls",lat:40.7608,lon:-111.891,instagram:"@wasatchwargulls",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2025/03/image0.png"},
+
+{name:"USAFL",lat:45,lon:-70,instagram:null,email:null,website:null,info:null,logo:"https://upload.wikimedia.org/wikipedia/en/e/ec/USAFL_logo.png"}
+
 ];
 
 const events = [
-  {club:"DC Eagles",       date:"2026-03-14", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 10am-12pm"},
-  {club:"DC Eagles",       date:"2026-03-17", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
-  {club:"DC Eagles",       date:"2026-03-21", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 10am-12pm"},
-  {club:"DC Eagles",       date:"2026-03-24", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
-  {club:"DC Eagles",       date:"2026-03-28", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 10am-12pm"},
-  {club:"DC Eagles",       date:"2026-03-31", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
-  {club:"DC Eagles",       date:"2026-04-07", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
-  {club:"DC Eagles",       date:"2026-04-14", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
-  {club:"Bayou Brawlers",  date:"2026-04-18", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-04-18", type:"game",      category:"club-metro",        lat:null, lon:null, subtitle:"West Potomac Park 10am-12pm"},
-  {club:"DC Eagles",       date:"2026-04-21", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
-  {club:"DC Eagles",       date:"2026-04-25", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Par 10am-12pm"},
-  {club:"DC Eagles",       date:"2026-04-28", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
-  {club:"DC Eagles",       date:"2026-05-02", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:"DC v NY"},
-  {club:"DC Eagles",       date:"2026-05-05", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park 6pm-sunset"},
-  {club:"DC Eagles",       date:"2026-05-09", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles",       date:"2026-05-12", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"DC Eagles",       date:"2026-05-26", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:"West Potomac Park"},
-  {club:"USAFL",           date:"2026-07-11", type:"game",      category:"league-tournament", lat:44.9778, lon:-93.3, subtitle:"Regionals - Minnesota"},
-  {club:"New York Magpies",date:"2026-09-12", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-05-30", type:"game",      category:"club-metro",        lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-06-02", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-06-06", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-06-09", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-06-16", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-06-23", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-06-27", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-06-30", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-07-07", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-08-01", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-08-04", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-08-08", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-08-11", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-08-15", type:"game",      category:"club-metro",        lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-08-18", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-08-22", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-08-25", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-08-29", type:"game",      category:"club-metro",        lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-09-01", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-09-08", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-09-12", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-09-15", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"New York Magpies",date:"2026-09-19", type:"game",      category:"club-tournament",   lat:null, lon:null, subtitle:"NY v DC"},
-  {club:"DC Eagles",       date:"2026-09-22", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-09-26", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-09-29", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-10-03", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-10-06", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"DC Eagles",       date:"2026-10-13", type:"practice",  category:"practice",          lat:null, lon:null, subtitle:null},
-  {club:"USAFL",           date:"2026-10-17", type:"game",      category:"league-tournament", lat:28.5383, lon:-81.3792, subtitle:"Nationals — Orlando"}
+
+{club:"DC Eagles",date:"2026-03-14",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-03-17",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-03-21",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Minnesota Freeze",date:"2026-03-21",time:"9am - 11am",type:"practice",category:"practice",lat:null,lon:null,location:"URW Sports Dome"},
+{club:"DC Eagles",date:"2026-03-24",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-03-28",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Minnesota Freeze",date:"2026-03-28",time:"11am - 1pm",type:"practice",category:"practice",lat:null,lon:null,location:"URW Sports Dome"},
+{club:"DC Eagles",date:"2026-03-31",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+
+{club:"DC Eagles",date:"2026-04-07",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-04-14",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Bayou Brawlers",date:"2026-04-18",time:null,type:"game",category:"club-tournament",lat:null,lon:null,location:null},
+{club:"DC Eagles",date:"2026-04-18",time:null,type:"game",category:"club-metro",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-04-21",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-04-25",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-04-28",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+
+{club:"DC Eagles",date:"2026-05-02",time:null,type:"game",category:"club-tournament",lat:null,lon:null,location:"DC v NY"},
+{club:"DC Eagles",date:"2026-05-05",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-05-09",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-05-12",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-05-26",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-05-30",time:null,type:"game",category:"club-metro",lat:null,lon:null,location:null},
+
+{club:"DC Eagles",date:"2026-06-02",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-06-06",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-06-09",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-06-16",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-06-23",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-06-27",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-06-30",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+
+{club:"DC Eagles",date:"2026-07-07",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"USAFL",date:"2026-07-11",time:null,type:"game",category:"league-tournament",lat:44.9778,lon:-93.3,location:"Regionals"},
+
+{club:"DC Eagles",date:"2026-08-01",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-08-04",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-08-08",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-08-11",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-08-15",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:null},
+{club:"DC Eagles",date:"2026-08-18",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-08-22",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-08-25",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-08-29",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:null},
+
+{club:"DC Eagles",date:"2026-09-01",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-09-08",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"New York Magpies",date:"2026-09-12",time:null,type:"game",category:"club-tournament",lat:null,lon:null,location:null},
+{club:"DC Eagles",date:"2026-09-12",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-09-15",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"New York Magpies",date:"2026-09-19",time:null,type:"game",category:"club-tournament",lat:null,lon:null,location:"NY v DC"},
+{club:"DC Eagles",date:"2026-09-22",time:null,type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-09-26",time:null,type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-09-29",time:null,type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+
+{club:"DC Eagles",date:"2026-10-03",time:null,type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-10-06",time:null,type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-10-13",time:null,type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"USAFL",date:"2026-10-17",time:null,type:"game",category:"league-tournament",lat:28.5383,lon:-81.3792,location:"Nationals - Orlando"}
+
 ];
-// /* ── BUILD SUBTITLE ── */ 
-// function buildSubtitle(e){
-
-//   let label = "";
-
-//   if (e.subtitle) {
-//     label += e.subtitle;
-//   }
-
-//   if (e.time) {
-//     if (label !== "") label += " • ";
-//     label += e.time;
-//   }
-
-//   return label || null;
-
-// }
     
 /* ── STATE ── */
 let selectedClub = null;
@@ -638,7 +661,7 @@ L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r
   maxZoom: 19
 }).addTo(map);
 
-const cluster = L.markerClusterGroup({ maxClusterRadius: 10, disableClusteringAtZoom: 6 });
+const cluster = L.markerClusterGroup({ maxClusterRadius: 5, disableClusteringAtZoom: 6 });
 map.addLayer(cluster);
 
 /* ── ICON HELPERS ── */
@@ -726,19 +749,57 @@ function formatEventType(e) {
 }
 
 /* ── MARKERS ── */
+function buildClubCard(club, clickable=false){
+
+  const nextGame = getNextGame(club.name);
+
+  const ig = club.instagram
+    ? clickable
+      ? `<a href="https://www.instagram.com/${club.instagram.replace("@","")}/" target="_blank">${club.instagram}</a><br>`
+      : `${club.instagram}<br>`
+    : "";
+
+  const contact = club.email
+    ? clickable
+      ? `<a href="mailto:${club.email}">${club.email}</a><br>`
+      : `${club.email}<br>`
+    : "";
+
+  const website = club.website
+    ? clickable
+      ? `<a href="${club.website}" target="_blank">${club.website}</a><br>`
+      : `${club.website}<br>`
+    : "";
+
+  const info = club.info
+    ? `${club.info}<br>`
+    : "";
+
+  const gameBlock = nextGame
+    ? `<div style="margin-top:6px;font-size:12px;color:#555;">
+        <b>Next Game</b><br>
+        ${nextGame.date}${nextGame.time ? " · " + nextGame.time : ""}
+        ${nextGame.location ? "<br>" + nextGame.location : ""}
+      </div>`
+    : "";
+
+  return `
+    <div style="text-align:center;">
+      <b>${club.name}</b><br>
+      ${ig}
+      ${contact}
+      ${website}
+      ${info}
+      ${gameBlock}
+    </div>
+  `;
+};
+
 clubs.forEach(club => {
+
   const marker = L.marker([club.lat, club.lon], { icon: createClubIcon(club.logo) });
   marker.club = club;
 
-  // marker.on("click", () => {
-  //   selectedClub = club.name;
-  //   map.flyTo([club.lat, club.lon], 7);
-  //   showClubEvents(club.name);
-  //   // Update active state in sidebar
-  //   document.querySelectorAll('.club').forEach(el => {
-  //     el.classList.toggle('active', el.dataset.club === club.name);
-  //   });
-  // });
   marker.on("click", () => {
 
     selectedClub = club.name;
@@ -747,42 +808,31 @@ clubs.forEach(club => {
 
     showClubEvents(club.name);
 
-    /* open calendar sidebar */
     document.getElementById("eventsContent").style.display = "block";
     document.getElementById("eventsHeader").classList.add("open");
 
     highlightCalendarForClub(club.name);
 
-    /* keep popup visible with clickable IG */
-    const ig = club.instagram
-      ? `<a href="https://www.instagram.com/${club.instagram.replace("@","")}/" target="_blank">${club.instagram}</a>`
-      : "";
+    marker.bindPopup(buildClubCard(club, true)).openPopup();
 
-    marker.bindPopup(`
-      <b>${club.name}</b><br>
-      ${ig}
-    `).openPopup();
-
-  });  
-
-  marker.on("mouseover", () => {
-    const next = getUpcomingEvents(club.name, 1)[0];
-    const ig = club.instagram
-      ? `<br><a href="https://www.instagram.com/${club.instagram.replace("@","")}/" target="_blank" style="color:#2563eb;text-decoration:none;">${club.instagram}</a>`
-      : "";
-    const nextStr = next
-      ? `<br><span style="color:rgba(30,40,60,0.45);font-size:11px;">Next: ${next.date} — ${formatEventType(next)}</span>`
-      : "";
-    marker.bindTooltip(
-      `<b style="color:rgba(30,40,60,0.9);">${club.name}</b>${ig}${nextStr}`,
-      { direction: "top", offset: [0, -10], opacity: 1, sticky: true, className: "club-tooltip" }
-    ).openTooltip();
   });
 
-  marker.on("mouseout", () => marker.closeTooltip());
+  marker.on("mouseover", () => {
+
+    marker.bindTooltip(
+      buildClubCard(club, false),
+      { direction:"top", offset:[0,-10], opacity:1, sticky:true, className:"club-tooltip" }
+    ).openTooltip();
+
+  });
+
+  marker.on("mouseout", () => {
+    marker.closeTooltip();
+  });
 
   cluster.addLayer(marker);
   clubMarkers[club.name] = marker;
+
 });
 
 /* ── ZOOM ICON RESIZE ── */
@@ -819,60 +869,66 @@ function showEventsForDate(date) {
 
 });
 
-  // /* reset all club icons */
-  // Object.values(clubMarkers).forEach(marker => {
-  //   marker.setIcon(createClubIcon(marker.club.logo));
-  // });
+const dayEvents = events.filter(e => e.date === date);
 
-  const dayEvents = events.filter(e => e.date === date);
+if (!dayEvents.length) {
+list.innerHTML = `<b>No events on ${date}</b>`;
+return;
+}
 
-  if (!dayEvents.length) {
-    list.innerHTML = `<b>No events on ${date}</b>`;
-    return;
+list.innerHTML = `<b>${date}</b>`;
+
+dayEvents.forEach(e => {
+
+  const color = dotColor(e.category);
+  const label = formatEventType(e);
+
+  const time = e.time ? ` · ${e.time}` : "";
+  const loc  = e.location ? ` — ${e.location}` : "";
+
+  list.innerHTML += `
+    <div class="event-row">
+      <div class="event-dot" style="background:${color};"></div>
+      ${e.club} ${label}${time}${loc}
+    </div>
+  `;
+
+  /* highlight club marker */
+  if (clubMarkers[e.club]) {
+    const club = clubMarkers[e.club].club;
+
+    clubMarkers[e.club].setIcon(
+      createEventIcon(club.logo, ringColor(e))
+    );
   }
 
-  list.innerHTML = `<b>${date}</b>`;
+  /* league event marker */
+  if (e.category === "league-tournament" && e.lat) {
+    leagueMarker = L.marker(
+      [e.lat, e.lon],
+      { icon: createLeagueIcon() }
+    ).addTo(map);
 
-  dayEvents.forEach(e => {
+    map.flyTo([e.lat, e.lon], 5);
+  }
 
-    const color = dotColor(e.category);
-    const label = formatEventType(e);
-    const sub = e.subtitle ? ` — ${e.subtitle}` : "";
+});
 
-    list.innerHTML += `
-      <div class="event-row">
-        <div class="event-dot" style="background:${color};"></div>
-        ${e.club} ${label}${sub}
-      </div>
-    `;
+/* emphasize markers AFTER loop */
+Object.values(clubMarkers).forEach(m => {
 
-    /* highlight club marker */
-    if (clubMarkers[e.club]) {
-      const club = clubMarkers[e.club].club;
-      clubMarkers[e.club].setIcon(
-        createEventIcon(club.logo, ringColor(e))
-      );
-    }
+  const el = m.getElement();
+  if (!el) return;
 
-    /* league event marker */
-    if (e.category === "league-tournament" && e.lat) {
-      leagueMarker = L.marker([e.lat, e.lon], { icon: createLeagueIcon() }).addTo(map);
-      map.flyTo([e.lat, e.lon], 5);
-    }
+  if (dayEvents.some(ev => ev.club === m.club.name)) {
+    el.classList.add("marker-active");
+    el.classList.remove("marker-faded");
+  } else {
+    el.classList.add("marker-faded");
+    el.classList.remove("marker-active");
+  }
 
-    /* emphasize markers */
-    Object.values(clubMarkers).forEach(m=>{
-      const el = m.getElement();
-      if(!el) return;
-    
-      if(dayEvents.some(ev => ev.club === m.club.name)){
-        el.classList.add("marker-active");
-      } else {
-        el.classList.add("marker-faded");
-      }
-    });
-
-  });
+});
 }
 
 function highlightCalendarForClub(clubName){
@@ -914,13 +970,29 @@ function showClubEvents(clubName) {
   });
 }
 
+function getNextGame(clubName){
+
+  const today = new Date();
+
+  const next = events
+    .filter(e =>
+      e.club === clubName &&
+      (e.category === "club-metro" || e.category === "club-tournament") &&
+      new Date(e.date) >= today
+    )
+    .sort((a,b)=> new Date(a.date) - new Date(b.date))[0];
+
+  return next || null;
+
+}
+
 function buildEventSubtitle(e){
 
-  if (e.subtitle && e.time) {
-    return `${e.subtitle} • ${e.time}`;
+  if (e.location && e.time) {
+    return `${e.location} • ${e.time}`;
   }
 
-  if (e.subtitle) return e.subtitle;
+  if (e.location) return e.location;
 
   if (e.time) return e.time;
 
@@ -935,7 +1007,7 @@ function buildTicker() {
     .filter(e => e.type === "game" && new Date(e.date) >= today)
     .sort((a, b) => new Date(a.date) - new Date(b.date));
   const text = upcoming
-    .map(e => `${new Date(e.date + "T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"})} · ${e.club} ${formatEventType(e)}${e.subtitle ? " — " + e.subtitle : ""}`)
+    .map(e => `${new Date(e.date + "T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"})} · ${e.club} ${formatEventType(e)}`)
     .join("   |   ");
   document.getElementById("tickerText").textContent = text + "   ·   " + text;
 }
