@@ -62,7 +62,7 @@ body {
   white-space: nowrap;
   display: inline-block;
   padding-left: 100%;
-  animation: scroll 160s linear infinite;
+  animation: scroll 300s linear infinite;
   position: relative;
   z-index: 1;
 }
@@ -540,7 +540,7 @@ const clubs = [
 
 {name:"Chicago Swans",lat:41.8781,lon:-87.6298,instagram:"@chicagofooty",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/cafa_logo_300x400-1-3.png"},
 
-{name:"Cincinnati Dockers",lat:39.1031,lon:-84.512,instagram:"@cincinattidockers",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Cincinnati-Dockers-400w-2.png"},
+{name:"Cincinnati Dockers",lat:39.1031,lon:-84.512,instagram:"@cincinnatidockers",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/Cincinnati-Dockers-400w-2.png"},
 
 {name:"Columbus Cats",lat:39.9612,lon:-82.9988,instagram:"@columbusfooty",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/ColumbusCats-3.png"},
 
@@ -570,6 +570,8 @@ const clubs = [
 
 {name:"Sacramento Suns",lat:38.5816,lon:-121.4944,instagram:"@sacfooty",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/SacramentoSuns_0.png"},
 
+{name:"San Diego Lions",lat:32.7524772511001,lon:-117.158631674685,instagram:"@sandiegolions",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/SD20Lions20Logo.jpg"},
+
 {name:"Saint Louis Australian Football Club",lat:38.627,lon:-90.1994,instagram:"@stlaustralianfootball",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/STL20Logo202022-1-768x768.jpeg"},
 
 {name:"Seattle Grizzlies",lat:47.6062,lon:-122.3321,instagram:"@seattlegrizzlies",email:null,website:null,info:null,logo:"https://aussierulesusa.com/wp-content/uploads/2024/05/seattle_grizzlies-1-768x792.png"},
@@ -583,67 +585,127 @@ const clubs = [
 ];
 
 const events = [
+{club:"Houston Lonestars",date:"2026-09-19",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Texas Cup Round 3 - Houston"},
 
 {club:"DC Eagles",date:"2026-03-14",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
 {club:"DC Eagles",date:"2026-03-17",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"DC Eagles",date:"2026-03-21",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-03-21",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"Tag"},
 {club:"Minnesota Freeze",date:"2026-03-21",time:"9am - 11am",type:"practice",category:"practice",lat:null,lon:null,location:"URW Sports Dome"},
+{club:"Sacramento Suns",date:"2026-03-21",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"Umpire Clinic"},
+{club:"Portland Sockeyes",date:"2026-03-22",time:"1:00 pm",type:"practice",category:"practice",lat:null,lon:null,location:"Clinton City Park"},
 {club:"DC Eagles",date:"2026-03-24",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
 {club:"DC Eagles",date:"2026-03-28",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
 {club:"Minnesota Freeze",date:"2026-03-28",time:"11am - 1pm",type:"practice",category:"practice",lat:null,lon:null,location:"URW Sports Dome"},
+{club:"Sacramento Suns",date:"2026-03-28",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"Tackle Umpire Clinic"},
+{club:"Portland Sockeyes",date:"2026-03-29",time:"1:00 pm",type:"practice",category:"practice",lat:null,lon:null,location:"Clinton City Park"},
 {club:"DC Eagles",date:"2026-03-31",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
 
+{club:"Denver Bulldogs",date:"2026-04-03",time:"Clear Creek",type:"game",category:"club-metro",lat:null,lon:null,location:"Pub League Coed Rec Footy"},
 {club:"DC Eagles",date:"2026-04-07",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Denver Bulldogs",date:"2026-04-10",time:"Clear Creek",type:"game",category:"club-metro",lat:null,lon:null,location:"Pub League Coed Rec Footy"},
+{club:"Golden Gate",date:"2026-04-11",time:"",type:"practice",category:"practice",lat:null,lon:null,location:"Rec Footy"},
+{club:"San Diego Lions",date:"2026-04-11",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:""},
+{club:"Portland Sockeyes",date:"2026-04-12",time:"1:00 pm",type:"practice",category:"practice",lat:null,lon:null,location:"Clinton City Park"},
 {club:"DC Eagles",date:"2026-04-14",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"Bayou Brawlers",date:"2026-04-18",time:null,type:"game",category:"club-tournament",lat:null,lon:null,location:null},
-{club:"DC Eagles",date:"2026-04-18",time:null,type:"game",category:"club-metro",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Denver Bulldogs",date:"2026-04-17",time:"Clear Creek",type:"game",category:"club-metro",lat:null,lon:null,location:"Pub League Coed Rec Footy"},
+{club:"Bayou Brawlers",date:"2026-04-18",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Louisiana Invitational"},
+{club:"DC Eagles",date:"2026-04-18",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Golden Gate",date:"2026-04-18",time:"",type:"practice",category:"practice",lat:null,lon:null,location:"Rec Footy"},
+{club:"Portland Sockeyes",date:"2026-04-19",time:"1:00 pm",type:"practice",category:"practice",lat:null,lon:null,location:"Clinton City Park"},
 {club:"DC Eagles",date:"2026-04-21",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Denver Bulldogs",date:"2026-04-24",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:"Pub League Coed Rec Footy"},
+{club:"Arizona Lady Hawks",date:"2026-04-25",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Surf 'N Turf Cup - Arizona"},
 {club:"DC Eagles",date:"2026-04-25",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Golden Gate",date:"2026-04-25",time:"",type:"practice",category:"practice",lat:null,lon:null,location:"Rec Footy"},
+{club:"Sacramento Suns",date:"2026-04-25",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:"Bryte Park"},
+{club:"Portland Sockeyes",date:"2026-04-26",time:"1:00 pm",type:"practice",category:"practice",lat:null,lon:null,location:"Clinton City Park"},
 {club:"DC Eagles",date:"2026-04-28",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-
-{club:"DC Eagles",date:"2026-05-02",time:null,type:"game",category:"club-tournament",lat:null,lon:null,location:"DC v NY"},
+    
+{club:"DC Eagles",date:"2026-05-02",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"DC v NY"},
+{club:"Sacramento Suns",date:"2026-05-02",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:"Bryte Park"},
+{club:"Portland Sockeyes",date:"2026-05-03",time:"1:00 pm",type:"practice",category:"practice",lat:null,lon:null,location:"Clinton City Park"},
 {club:"DC Eagles",date:"2026-05-05",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
 {club:"DC Eagles",date:"2026-05-09",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Sacramento Suns",date:"2026-05-09",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:"Bryte Park"},
+{club:"Portland Sockeyes",date:"2026-05-10",time:"1:00 pm",type:"practice",category:"practice",lat:null,lon:null,location:"Clinton City Park"},
 {club:"DC Eagles",date:"2026-05-12",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"DC Eagles",date:"2026-05-26",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"DC Eagles",date:"2026-05-30",time:null,type:"game",category:"club-metro",lat:null,lon:null,location:null},
+{club:"Houston Lonestars",date:"2026-05-16",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:""},
+{club:"Portland Sockeyes",date:"2026-05-17",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:"PAFL Metro"},
+{club:"DC Eagles",date:"2026-05-26",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Sacramento Suns",date:"2026-05-26",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:"Bryte Park"},
+{club:"Portland Sockeyes",date:"2026-05-27",time:"1:00 pm",type:"practice",category:"practice",lat:null,lon:null,location:"Clinton City Park"},
+{club:"DC Eagles",date:"2026-05-30",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:""},
+{club:"Denver Bulldogs",date:"2026-05-30",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Denver Invitational"},
+{club:"North Texas Devils",date:"2026-05-30",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:"Texas Cup Round 1 - Dallas"},
+{club:"Sacramento Suns",date:"2026-05-30",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Rob Dollar Santa Barbara"},
+{club:"Portland Sockeyes",date:"2026-05-31",time:"1:00 pm",type:"practice",category:"practice",lat:null,lon:null,location:"Clinton City Park"},
 
 {club:"DC Eagles",date:"2026-06-02",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
 {club:"DC Eagles",date:"2026-06-06",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"New York Magpies",date:"2026-06-06",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Big 4 Tournament - Austin, Montreal, DC, NY"},
 {club:"DC Eagles",date:"2026-06-09",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"DC Eagles",date:"2026-06-16",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"DC Eagles",date:"2026-06-23",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"DC Eagles",date:"2026-06-27",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"North Texas Devils",date:"2026-06-12",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"North Texas vs AZ"},
+{club:"Orange County Giants",date:"2026-06-12",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"SoCal Cup Round 1"},
+{club:"Houston Lonestars",date:"2026-06-13",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:""},
+{club:"Sacramento Suns",date:"2026-06-13",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:"McKinley Park"},
+{club:"DC Eagles",date:"2026-06-16",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Houston Lonestars",date:"2026-06-20",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:""},
+{club:"Sacramento Suns",date:"2026-06-20",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"McKinley Park"},
+{club:"DC Eagles",date:"2026-06-23",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Austin Crows",date:"2026-06-27",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Texas Cup Round 2 - Austin"},
+{club:"DC Eagles",date:"2026-06-27",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"San Diego Lions",date:"2026-06-27",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Cali Cup San Diego"},
 {club:"DC Eagles",date:"2026-06-30",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
 
 {club:"DC Eagles",date:"2026-07-07",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"USAFL",date:"2026-07-11",time:null,type:"game",category:"league-tournament",lat:44.9778,lon:-93.3,location:"Regionals"},
+{club:"Sacramento Suns",date:"2026-07-11",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:""},
+{club:"USAFL",date:"2026-07-11",time:"",type:"game",category:"league-tournament",lat:44.9778,lon:-93.3,location:"Central/Eastern Regionals"},
+{club:"Portland Sockeyes",date:"2026-07-12",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:""},
+{club:"Sacramento Suns",date:"2026-07-18",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"McKinley Park"},
+{club:"USAFL",date:"2026-07-25",time:"",type:"game",category:"league-tournament",lat:44.93378653,lon:-122.9542187,location:"Western Regionals"},
 
 {club:"DC Eagles",date:"2026-08-01",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
 {club:"DC Eagles",date:"2026-08-04",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
 {club:"DC Eagles",date:"2026-08-08",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"New York Magpies",date:"2026-08-08",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Finger Lakes Tournament"},
+{club:"Orange County Giants",date:"2026-08-08",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"SoCal Cup Round 2"},
+{club:"Sacramento Suns",date:"2026-08-08",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:"Doc Oliver Park"},
+{club:"Portland Sockeyes",date:"2026-08-09",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:""},
 {club:"DC Eagles",date:"2026-08-11",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"DC Eagles",date:"2026-08-15",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:null},
+{club:"DC Eagles",date:"2026-08-15",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:""},
+{club:"Golden Gate",date:"2026-08-15",time:"10am - 12pm",type:"game",category:"club-tournament",lat:null,lon:null,location:"SF Invitational"},
 {club:"DC Eagles",date:"2026-08-18",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
 {club:"DC Eagles",date:"2026-08-22",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Denver Bulldogs",date:"2026-08-22",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Denver Invitational"},
+{club:"Sacramento Suns",date:"2026-08-22",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:"Doc Oliver Park"},
 {club:"DC Eagles",date:"2026-08-25",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"DC Eagles",date:"2026-08-29",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:null},
+{club:"DC Eagles",date:"2026-08-29",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:""},
+{club:"San Diego Lions",date:"2026-08-29",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Surf N Turf - San Diego"},
+{club:"Portland Sockeyes",date:"2026-08-30",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:""},
 
 {club:"DC Eagles",date:"2026-09-01",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
 {club:"DC Eagles",date:"2026-09-08",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"New York Magpies",date:"2026-09-12",time:null,type:"game",category:"club-tournament",lat:null,lon:null,location:null},
 {club:"DC Eagles",date:"2026-09-12",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Houston Lonestars",date:"2026-09-12",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:""},
+{club:"Minnesota Freeze",date:"2026-09-12",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Yeti Cup"},
+{club:"Sacramento Suns",date:"2026-09-12",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"Suns v GG / others"},
+{club:"New York Magpies",date:"2026-09-13",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"9/11 Anniversary Game"},
 {club:"DC Eagles",date:"2026-09-15",time:"6pm - sunset",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"New York Magpies",date:"2026-09-19",time:null,type:"game",category:"club-tournament",lat:null,lon:null,location:"NY v DC"},
-{club:"DC Eagles",date:"2026-09-22",time:null,type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"DC Eagles",date:"2026-09-26",time:null,type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"DC Eagles",date:"2026-09-29",time:null,type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"New York Magpies",date:"2026-09-19",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"NY v DC"},
+{club:"Orange County Giants",date:"2026-09-19",time:"",type:"game",category:"club-tournament",lat:null,lon:null,location:"SoCal Cup Round 3"},
+{club:"Sacramento Suns",date:"2026-09-19",time:"10am - 12pm",type:"game",category:"club-metro",lat:null,lon:null,location:"Doc Oliver Metro Finals"},
+{club:"DC Eagles",date:"2026-09-22",time:"",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"DC Eagles",date:"2026-09-26",time:"",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Houston Lonestars",date:"2026-09-26",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:""},
+{club:"Portland Sockeyes",date:"2026-09-27",time:"",type:"game",category:"club-metro",lat:null,lon:null,location:""},
+{club:"DC Eagles",date:"2026-09-29",time:"",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
 
-{club:"DC Eagles",date:"2026-10-03",time:null,type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"DC Eagles",date:"2026-10-06",time:null,type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"DC Eagles",date:"2026-10-13",time:null,type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
-{club:"USAFL",date:"2026-10-17",time:null,type:"game",category:"league-tournament",lat:28.5383,lon:-81.3792,location:"Nationals - Orlando"}
-
+{club:"DC Eagles",date:"2026-10-03",time:"",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Sacramento Suns",date:"2026-10-03",time:"",type:"practice",category:"practice",lat:null,lon:null,location:"Doc Oliver Park"},
+{club:"DC Eagles",date:"2026-10-06",time:"",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"Sacramento Suns",date:"2026-10-11",time:"10am - 12pm",type:"practice",category:"practice",lat:null,lon:null,location:"Doc Oliver Park"},
+{club:"DC Eagles",date:"2026-10-13",time:"",type:"practice",category:"practice",lat:null,lon:null,location:"West Potomac Park"},
+{club:"USAFL",date:"2026-10-17",time:"",type:"game",category:"league-tournament",lat:28.5383,lon:-81.3792,location:"Nationals - Orlando"}
 ];
     
 /* ── STATE ── */
